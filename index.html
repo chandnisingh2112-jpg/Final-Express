@@ -1776,20 +1776,48 @@
             <h1 class="landing-title">Laundry Express</h1>
             <p class="landing-sub">Premium Care. Zero Hassle.</p>
 
-            <button class="btn-google" onclick="landingApp.handleGoogleAuth()">
-                <svg class="g-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                    <path fill="#EA4335"
-                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+            <!-- Google One Tap Config Removed (Handled in JS) -->
+
+            <!-- Custom Google Sign-In Button -->
+            <button onclick="landingApp.handleGoogleBtnClick()" style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                background: white;
+                border: 1px solid #dadce0;
+                border-radius: 50px;
+                padding: 12px 24px;
+                font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+                font-size: 16px;
+                font-weight: 500;
+                color: #3c4043;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                margin-top: 20px;
+                min-width: 280px;
+            " onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'; this.style.background='#f8f9fa'"
+                onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'; this.style.background='white'">
+                <svg width="18" height="18" viewBox="0 0 18 18">
                     <path fill="#4285F4"
-                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                    <path fill="#FBBC05"
-                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
                     <path fill="#34A853"
-                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                    <path fill="none" d="M0 0h48v48H0z" />
+                        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" />
+                    <path fill="#FBBC05"
+                        d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" />
+                    <path fill="#EA4335"
+                        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" />
                 </svg>
                 Continue with Google
             </button>
+
+            <!-- Or skip to home -->
+            <p style="margin-top: 20px; color: var(--text-sub); font-size: 12px;">
+                <span style="cursor: pointer; text-decoration: underline;" onclick="globalNav.switchView('home')">
+                    Cancel
+                </span>
+            </p>
         </div>
     </div>
 
@@ -2455,14 +2483,16 @@
         try {
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
-                var auth = firebase.auth();
-                var db = firebase.database();
+                window.auth = firebase.auth();
+                window.db = firebase.database();
                 var provider = new firebase.auth.GoogleAuthProvider();
             } else {
                 console.error("Firebase SDK not loaded");
                 alert("Error loading app resources. Please check internet connection.");
             }
         } catch (e) { console.error(e); }
+
+        // Global callback removed - now handled in landingApp
 
         // --- 2. APP MODULES ---
 
@@ -2549,6 +2579,7 @@
             },
             goToLogin() {
                 globalNav.switchView('landing');
+                setTimeout(() => landingApp.triggerOneTap(), 300);
             },
             updateProfileVisibility(isLoggedIn) {
                 const staticInfo = document.getElementById('static-info');
@@ -2881,7 +2912,7 @@
             },
             checkDbAndRedirect: (user) => {
                 const uid = user.uid;
-                const userRef = db.ref('users/' + uid);
+                const userRef = window.db.ref('users/' + uid);
                 userRef.once('value').then((snapshot) => {
                     if (snapshot.exists()) {
                         const userData = snapshot.val();
@@ -2890,8 +2921,13 @@
                         globalNav.switchView('home');
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     } else {
-                        document.getElementById('view-landing').classList.remove('active');
-                        document.getElementById('view-login').classList.add('active');
+                        // Account doesn't exist -> Go to Profile Setup
+                        globalNav.switchView('login');
+                        // Show "Step 1" of profile setup
+                        setTimeout(() => {
+                            document.getElementById('step1').classList.add('active');
+                            document.getElementById('step2').classList.remove('active');
+                        }, 100);
                     }
                 }).catch((error) => {
                     console.error("Database error:", error);
@@ -2899,63 +2935,76 @@
                 });
             },
             initGoogleOneTap: () => {
-                console.log("Initializing Google One Tap...");
+                // Check if Google script is loaded
                 if (typeof google === 'undefined') {
-                    console.warn("Google Identity Services script not loaded yet. Retrying...");
+                    console.warn("Google script not loaded. Retrying...");
                     setTimeout(landingApp.initGoogleOneTap, 500);
                     return;
                 }
-                console.log("Google script found. Setting up client...");
+
+                // Initialize Google Identity Services
                 try {
                     google.accounts.id.initialize({
                         client_id: "438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com",
                         callback: landingApp.handleCredentialResponse,
-                        auto_select: true,
+                        auto_select: true, // Auto-selects if one account
                         cancel_on_tap_outside: false
                     });
-                    console.log("Client initialized. Requesting prompt...");
+
+                    // Show One Tap prompt immediately
                     google.accounts.id.prompt((notification) => {
-                        console.log("Prompt notification received:", notification);
                         if (notification.isNotDisplayed()) {
-                            console.error("One Tap NOT displayed. Reason:", notification.getNotDisplayedReason());
+                            console.log("One Tap Not Displayed:", notification.getNotDisplayedReason());
                         } else if (notification.isSkippedMoment()) {
-                            console.warn("One Tap skipped. Reason:", notification.getSkippedReason());
-                        } else {
-                            console.log("One Tap displayed successfully.");
+                            console.warn("One Tap Skipped:", notification.getSkippedReason());
                         }
                     });
                 } catch (e) {
-                    console.error("Error during One Tap initialization:", e);
+                    console.error("Google Sign-In Init Error:", e);
                 }
             },
+            triggerOneTap: () => {
+                landingApp.initGoogleOneTap();
+            },
+
+            handleGoogleBtnClick: () => {
+                if (typeof google === 'undefined') {
+                    accountApp.showToast("Google services loading...");
+                    landingApp.initGoogleOneTap();
+                    return;
+                }
+                // Prompt again for explicit action
+                google.accounts.id.prompt((notification) => {
+                    if (notification.isNotDisplayed()) {
+                        console.warn("Prompt suppressed/not displayed:", notification.getNotDisplayedReason());
+                        // Fallback to popup if prompt suppressed? 
+                        // For now, let's stick to prompt, but logging is helpful.
+                    }
+                });
+            },
+
             handleCredentialResponse: (response) => {
-                console.log("Credential response received from Google:", response);
+                console.log("Credential response received:", response);
                 if (!response.credential) {
                     console.error("No credential token received!");
                     return;
                 }
-                console.log("Creating Firebase credential...");
+
+                // Sign in with Firebase
                 const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-                console.log("Signing into Firebase...");
-                auth.signInWithCredential(credential)
+                window.auth.signInWithCredential(credential)
                     .then((result) => {
                         console.log("Firebase Sign-In Successful:", result);
                         accountApp.showToast("Logged in successfully!");
                     })
                     .catch((error) => {
                         console.error("Firebase Auth Error:", error);
-                        console.error("Error Code:", error.code);
-                        console.error("Error Message:", error.message);
                         accountApp.showToast("Login Failed: " + error.message);
                     });
             },
-            handleGoogleAuth: () => {
-                // Trigger the Google One Tap prompt manually if the button is clicked
-                google.accounts.id.prompt();
-            },
             confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
             performLogout: () => {
-                auth.signOut().then(() => {
+                window.auth.signOut().then(() => {
                     localStorage.removeItem('laundryUser');
                     if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
                     location.reload();
@@ -2996,8 +3045,7 @@
                 db.ref('users/' + currentUser.uid).set(userData)
                     .then(() => {
                         localStorage.setItem('laundryUser', JSON.stringify(userData));
-                        document.getElementById('view-login').classList.remove('active');
-                        document.getElementById('view-home').classList.add('active');
+                        globalNav.switchView('home');
                         globalNav.loadUserData(userData);
                         accountApp.showToast("Welcome!");
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
@@ -3020,6 +3068,8 @@
                     homeApp.navTo('home', false);
                 } else if (viewName === 'orders') {
                     if (typeof ordersApp !== 'undefined') ordersApp.init();
+                } else if (viewName === 'landing') {
+                    landingApp.triggerOneTap();
                 }
 
                 if (addHistory) {
@@ -3841,8 +3891,8 @@
                 }
             }, 2000);
 
-            if (typeof auth !== 'undefined') {
-                auth.onAuthStateChanged((user) => {
+            if (typeof window.auth !== 'undefined') {
+                window.auth.onAuthStateChanged((user) => {
                     if (user) {
                         console.log("User detected:", user.uid);
                         landingApp.checkDbAndRedirect(user);
