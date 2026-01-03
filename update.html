@@ -1,0 +1,3867 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="origin-when-cross-origin">
+    <title>Laundry Express</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+    <style>
+        /* --- COLORHUNT PALETTE THEME --- */
+        :root {
+            /* Default Light Theme - Aesthetic Palette */
+            /* Palette: #66545e, #a39193, #aa6f73, #eea990, #f6e0b5 */
+            --bg-body: #f6e0b5;
+            /* Cream/Beige Background */
+            --bg-card: #ffffff;
+            /* White Cards */
+            --bg-panel: #fffbf5;
+            /* Lighter Panel */
+            --text-main: #66545e;
+            /* Dark Mauve */
+            --text-sub: #a39193;
+            /* Dusty Pink */
+            --text-on-primary: #ffffff;
+            --border-color: #eea990;
+            /* Peach Border */
+            --primary-action: #aa6f73;
+            /* Rose Action */
+            --primary-action-text: #ffffff;
+            --shadow-subtle: 0 4px 12px rgba(102, 84, 94, 0.08);
+            --shadow-strong: 0 8px 24px rgba(102, 84, 94, 0.15);
+
+            /* Dimensions */
+            --card-radius: 20px;
+            --item-thickness: 16px;
+            --touch-target: 44px;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Dark Theme - Updated Palette (Light Mode Variant) */
+        [data-theme="dark"] {
+            /* Palette: #3e204f, #5a4565, #cec9d6, #e2dbe9, #bcaecc */
+            --bg-body: #e2dbe9;
+            /* Lightest Lilac BG */
+            --bg-card: #ffffff;
+            /* White Cards */
+            --bg-panel: #f3f5f6;
+            --text-main: #3e204f;
+            /* Deepest Purple Text */
+            --text-sub: #5a4565;
+            /* Muted Purple Text */
+            --text-on-primary: #ffffff;
+            --border-color: #cec9d6;
+            /* Light Grey/Lilac Border */
+            --primary-action: #5a4565;
+            /* Deep Purple Action */
+            --primary-action-text: #ffffff;
+            --shadow-subtle: 0 4px 12px rgba(62, 32, 79, 0.08);
+            --shadow-strong: 0 8px 24px rgba(62, 32, 79, 0.15);
+        }
+
+        /* Midnight Blue -> Pastel Dream Theme */
+        [data-theme="blue"] {
+            /* Palette: #f2e2e2, #f4dae7, #fbe4dd, #eedeff, #fbf7f7 */
+            --bg-body: #fbf7f7;
+            /* Lightest White/Pink */
+            --bg-card: #ffffff;
+            /* White */
+            --bg-panel: #eedeff;
+            /* Lavender Panel */
+            --text-main: #4a3b52;
+            /* Deep Purple/Grey for contrast */
+            --text-sub: #887691;
+            /* Muted Purple */
+            --text-on-primary: #4a3b52;
+            --border-color: #f4dae7;
+            /* Pink Border */
+            --primary-action: #fbe4dd;
+            /* Peach Action */
+            --primary-action-text: #4a3b52;
+            --shadow-subtle: 0 4px 12px rgba(244, 218, 231, 0.4);
+            --shadow-strong: 0 8px 24px rgba(238, 222, 255, 0.5);
+        }
+
+        /* Forest Green Theme */
+        /* Forest Green Theme - Updated Palette (Light Mode) */
+        [data-theme="green"] {
+            /* Palette: #e4fde1, #8acb88, #519872, #3b5249, #1b3022 */
+            --bg-body: #e4fde1;
+            /* Hint of Green (Lightest) */
+            --bg-card: #ffffff;
+            /* White Cards */
+            --bg-panel: #d6f5d3;
+            /* Slightly darker than body for panels */
+            --text-main: #1b3022;
+            /* Celtic (Darkest Green) */
+            --text-sub: #3b5249;
+            /* Mineral Green */
+            --text-on-primary: #ffffff;
+            --border-color: #8acb88;
+            /* De York */
+            --primary-action: #519872;
+            /* Aqua Forest */
+            --primary-action-text: #ffffff;
+            --shadow-subtle: 0 4px 12px rgba(27, 48, 34, 0.08);
+            --shadow-strong: 0 8px 24px rgba(27, 48, 34, 0.15);
+        }
+
+        /* Urban Light Theme - Shades of Teal */
+        [data-theme="purple"] {
+            /* Palette: #b2d8d8, #66b2b2, #008080, #006666, #004c4c */
+            --bg-body: #b2d8d8;
+            /* Powder Teal */
+            --bg-card: #f8ffff;
+            /* Very Light Teal Tint */
+            --bg-panel: #66b2b2;
+            /* Medium Teal Panel */
+            --text-main: #004c4c;
+            /* Darkest Teal */
+            --text-sub: #006666;
+            /* Dark Teal */
+            --text-on-primary: #ffffff;
+            --border-color: #66b2b2;
+            /* Medium Teal */
+            --primary-action: #008080;
+            /* Teal Action */
+            --primary-action-text: #ffffff;
+            --shadow-subtle: 0 4px 12px rgba(0, 76, 76, 0.1);
+            --shadow-strong: 0 8px 24px rgba(0, 76, 76, 0.2);
+        }
+
+        /* Theme Card Styles */
+        .theme-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-card.active {
+            border-color: var(--primary-action);
+            background: var(--bg-panel);
+            transform: scale(1.02);
+        }
+
+        .theme-colors {
+            display: flex;
+            gap: 8px;
+        }
+
+        .theme-color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overscroll-behavior-y: contain;
+        }
+
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+            font-size: 14px;
+            line-height: 1.5;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- SOLID UTILS (Replaces Glass) --- */
+        .glass-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-subtle);
+            border-radius: var(--card-radius);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Removed backdrop-filter */
+        }
+
+        /* Stronger Panel */
+        .glass-panel-strong {
+            background: var(--bg-panel);
+            /* Distinct background color */
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-strong);
+            /* Removed backdrop-filter */
+        }
+
+        /* Removed gradient overlay */
+
+        /* --- NAVIGATION UTILS --- */
+        .view-section {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 90px;
+            animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        #view-landing.view-section {
+            padding-bottom: 0;
+        }
+
+        #view-account.view-section {
+            padding-bottom: 0;
+        }
+
+        #view-info.view-section {
+            padding-bottom: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- PAGE 0: LANDING PAGE --- */
+        .landing-container {
+            height: 100vh;
+            width: 100%;
+            background: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            padding: 30px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+        }
+
+        .logo-box {
+            background: var(--bg-card);
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-radius: 32px;
+            border: 2px solid var(--col-deep-night);
+            box-shadow: var(--shadow-strong);
+            /* Removed backdrop-filter */
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .logo-img-landing {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .landing-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .landing-sub {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 35px;
+            font-weight: 400;
+        }
+
+        .btn-google {
+            background: white;
+            color: #333;
+            width: 100%;
+            max-width: 280px;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.2s;
+            font-size: 14px;
+        }
+
+        .btn-google:active {
+            transform: scale(0.96);
+        }
+
+        .g-svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- PAGE 1: LOGIN --- */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            /* Removed backdrop-filter */
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-strong);
+            width: 100%;
+            max-width: 360px;
+            padding: 24px;
+            /* Reduced from 30px */
+            border-radius: 20px;
+            /* Smaller radius */
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 0;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .progress-bar-fill {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            height: 4px;
+            background: var(--primary-action);
+            /* Use brand orange */
+            z-index: 0;
+            transform: translateY(-50%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .step-indicator {
+            width: 30px;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #888;
+            z-index: 1;
+            transition: 0.3s;
+            font-size: 12px;
+            border: 3px solid white;
+        }
+
+        .step-indicator.active {
+            background: var(--primary-action);
+            color: var(--primary-action-text);
+            border-color: var(--primary-action);
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .login-input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .login-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+        }
+
+        .login-input,
+        .login-textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            font-size: 1rem;
+            transition: 0.3s;
+            background: var(--bg-panel);
+            /* Solid panel bg */
+            color: var(--text-main);
+            /* Removed backdrop-filter */
+        }
+
+        [data-theme="dark"] .login-input {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-main);
+        }
+
+        .login-input:focus,
+        .login-textarea:focus {
+            border-color: var(--primary-action);
+            background: var(--bg-card);
+        }
+
+        .phone-wrapper {
+            display: flex;
+            align-items: center;
+        }
+
+        .country-code {
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 14px 0 0 14px;
+            color: var(--text-main);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .phone-wrapper input {
+            border-radius: 0 14px 14px 0;
+            border-left: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-action);
+            color: var(--primary-action-text);
+            box-shadow: 0 4px 15px rgba(247, 148, 29, 0.3);
+            /* Orange shadow */
+        }
+
+        [data-theme="dark"] .btn-primary {
+            background-color: var(--primary-action);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* --- PAGE 2: HOME / APP --- */
+        .header {
+            background: var(--bg-body);
+            /* Solid background */
+            /* Removed backdrop-filter */
+            padding: 12px 16px;
+            /* Reduced padding */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .header-left-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .app-icon-small {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: var(--bg-card);
+            padding: 0;
+        }
+
+        .user-icon {
+            background: var(--bg-panel);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            /* Center the tabs */
+            padding: 10px 16px;
+            gap: 15px;
+            position: relative;
+            background: transparent;
+        }
+
+        .tab {
+            flex: 0 1 auto;
+            /* Don't stretch */
+            text-align: center;
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            background: transparent;
+            /* No background by default */
+            color: var(--text-sub);
+            border: 1px solid var(--border-color);
+            /* Subtle outline */
+            transition: all 0.2s ease;
+            min-width: 90px;
+            /* Consistent width */
+        }
+
+        .tab::before {
+            display: none;
+            /* Remove ripple effect for cleaner look */
+        }
+
+        /* App Info Card Styling */
+        .info-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: var(--shadow-strong);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .info-title {
+            color: var(--text-main) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .info-text {
+            color: var(--text-sub) !important;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .tab:active {
+            transform: scale(0.96);
+        }
+
+        .tab.active {
+            background: var(--text-main);
+            /* Strong contrast */
+            color: var(--bg-body);
+            /* Inverted text */
+            border-color: var(--text-main);
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+
+
+
+        /* Product list with swipe support */
+        #product-list {
+            position: relative;
+            overflow: hidden;
+            touch-action: pan-y;
+        }
+
+        /* Slide animations */
+        .slide-left-enter {
+            animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide-right-enter {
+            animation: slideInFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        [data-theme="dark"] .tab.active {
+            background: var(--col-petrol);
+            color: var(--col-mist);
+        }
+
+        .app-container {
+            padding: 12px 16px;
+            /* Reduced from 15px 20px */
+        }
+
+        /* --- THICKER GLASS PRODUCT CARDS --- */
+        .product-card {
+            background: var(--bg-card);
+            /* Solid background */
+            /* Removed backdrop-filter */
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-subtle);
+            border-radius: var(--card-radius);
+            padding: var(--item-thickness);
+            /* Thicker padding */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        .product-card.pinned {
+            border: 2px solid var(--primary-action);
+            background-color: var(--bg-card);
+            order: -1;
+        }
+
+        .pin-badge {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: var(--primary-action);
+            color: var(--text-on-primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .prod-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            /* Reduced from 16px */
+        }
+
+        .prod-img-box {
+            width: 48px;
+            /* Reduced from 54px */
+            height: 48px;
+            background: var(--bg-panel);
+            border-radius: 12px;
+            /* Reduced from 14px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .prod-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .prod-img-fallback {
+            font-size: 20px;
+            /* Reduced from 22px */
+            color: var(--text-main);
+            display: none;
+        }
+
+        .prod-details h3 {
+            font-size: 14px;
+            /* Reduced from 15px */
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+        }
+
+        .prod-details p {
+            font-size: 10px;
+            /* Reduced from 11px */
+            color: var(--text-sub);
+            margin-top: 2px;
+            /* Reduced from 3px */
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 5px;
+            border-radius: 30px;
+        }
+
+        .btn-count {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            color: var(--text-main);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-count:active {
+            transform: scale(0.9);
+        }
+
+        .btn-count.active {
+            background: var(--col-deep-night);
+            color: var(--col-mist);
+            border: none;
+        }
+
+        [data-theme="dark"] .btn-count {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="dark"] .btn-count.active {
+            background: var(--col-teal);
+            color: var(--col-deep-night);
+        }
+
+        .count-val {
+            font-weight: 600;
+            width: 20px;
+            text-align: center;
+            color: var(--text-main);
+            font-size: 13px;
+        }
+
+        /* Floating Actions */
+        .floating-bar {
+            position: fixed;
+            bottom: 10px;
+            /* Shifted down */
+            left: 20px;
+            right: 20px;
+            background: var(--bg-card);
+            /* Solid White */
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            /* Reduced shadow */
+            transform: translateY(200%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 200;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .floating-bar {
+            background: var(--bg-panel);
+            /* Solid Dark */
+            color: white;
+        }
+
+        .floating-bar.show {
+            transform: translateY(0);
+        }
+
+        .add-btn {
+            background: var(--primary-action);
+            /* Use primary color CTA */
+            color: var(--primary-action-text);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            /* Shadow */
+            font-size: 13px;
+        }
+
+        [data-theme="dark"] .add-btn {
+            background: var(--primary-action);
+            color: var(--primary-action-text);
+        }
+
+        /* Cart & Orders */
+        .bag-card {
+            background: var(--bg-card);
+            /* Removed backdrop-filter */
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bag-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--primary-action);
+        }
+
+        .bag-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            padding-left: 10px;
+            font-size: 14px;
+        }
+
+        .delete-bag {
+            color: #e74c3c;
+            cursor: pointer;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 6px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .bag-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+            font-size: 12px;
+        }
+
+        .price-tag {
+            color: var(--text-main);
+            font-weight: 700;
+            font-size: 11px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .item-badge {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .service-options {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .service-opt {
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--text-sub);
+            background: var(--bg-panel);
+        }
+
+        .service-opt.active {
+            border-color: var(--text-main);
+            background: var(--text-main);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .service-opt.active {
+            background: var(--col-nomad);
+            color: var(--col-shark);
+        }
+
+        .bill-details {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        .bill-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-main);
+        }
+
+        .full-btn {
+            width: 100%;
+            background: var(--text-main);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        [data-theme="dark"] .full-btn {
+            background: var(--col-nomad);
+            color: var(--col-shark);
+        }
+
+        .full-btn:disabled {
+            background: #ccc;
+            color: #666;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Orders Page */
+        .order-card {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .oc-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .oc-date {
+            font-size: 12px;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .oc-id {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-left: 5px;
+            opacity: 0.7;
+        }
+
+        .oc-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .order-bag-section {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+
+        .bag-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+            padding-bottom: 6px;
+        }
+
+        .bag-name-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        .service-tags-container {
+            display: flex;
+            gap: 4px;
+        }
+
+        .service-tag {
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .service-tag.wash {
+            background: #dcdde1;
+            color: #333;
+        }
+
+        .service-tag.iron {
+            background: #f5f6fa;
+            color: #777;
+        }
+
+        .service-tag.dry {
+            background: #7f8fa6;
+            color: #fff;
+        }
+
+        .bag-items-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .bag-item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-main);
+        }
+
+        .item-qty-pill {
+            background: white;
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-left: 6px;
+        }
+
+        .oc-row-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding-top: 10px;
+            margin-top: 6px;
+        }
+
+        .oc-status {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .oc-status.processing {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .oc-status.completed {
+            background: #e8f5e9;
+            color: #43a047;
+        }
+
+        .oc-status.cancelled {
+            background: #ffebee;
+            color: #e53935;
+        }
+
+        .btn-cancel-order {
+            background-color: rgba(255, 235, 238, 0.7);
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Account */
+        .account-bg-layer {
+            padding: 20px;
+        }
+
+        .ac-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .profile-card-new {
+            background: var(--bg-card);
+            border-radius: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow: visible;
+            /* Changed from hidden to visible */
+            border: 1px solid var(--border-color);
+        }
+
+        .pc-banner {
+            height: 80px;
+            background: linear-gradient(to right, var(--text-main), #4a5568);
+            position: relative;
+            width: 100%;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .pc-edit-fab {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--col-mist);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            border: 1px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .pc-content {
+            padding: 0 20px 20px 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .pc-avatar-new {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--text-main);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: -35px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .settings-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--shadow-subtle);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .st-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .st-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .st-row:last-child {
+            border-bottom: none;
+        }
+
+        .st-icon-bg {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-main);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Overlays */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 320px;
+            text-align: center;
+            border: 1px solid white;
+            animation: fadeIn 0.3s;
+            color: var(--text-main);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Bottom Nav - Solid Dock */
+        .bottom-nav {
+            position: fixed;
+            bottom: 8px;
+            left: 20px;
+            right: 20px;
+            width: auto;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            padding: 14px 20px;
+            z-index: 99;
+            border-radius: 28px;
+            box-shadow: var(--shadow-strong);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .bottom-nav {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sub);
+            /* Use theme colors */
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            gap: 4px;
+        }
+
+        .nav-item i {
+            font-size: 22px;
+            transition: 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-accent);
+            /* Blue accent */
+            transform: scale(1.05);
+        }
+
+        .nav-item.active i {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .cart-badge-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background: #e74c3c;
+            border-radius: 50%;
+            display: none;
+            border: 1px solid rgba(0, 0, 0, 0.5);
+        }
+
+        /* Helpers */
+        .hidden {
+            display: none !important;
+        }
+
+        .btn-save {
+            background-color: var(--text-main);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #2d3436;
+            /* Dark background */
+            color: #ffffff;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px 24px;
+            position: fixed;
+            z-index: 10000;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            top: 40px;
+            /* Display at top */
+        }
+
+        /* Order Success */
+        .order-success-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            z-index: 10001;
+            /* Ensure on top of everything */
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .checkmark-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 4px solid white;
+            box-shadow: var(--shadow-strong);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .checkmark-circle i {
+            font-size: 40px;
+            color: var(--text-main);
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Toggle */
+        .toggle-switch {
+            position: relative;
+            width: 46px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--text-main);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Area Validation Styles */
+        .area-input-wrapper {
+            position: relative;
+        }
+
+        .login-input.error {
+            border-color: #e74c3c !important;
+            background: rgba(231, 76, 60, 0.05) !important;
+        }
+
+        .login-input.valid {
+            border-color: #27ae60 !important;
+            background: rgba(39, 174, 96, 0.05) !important;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 11px;
+            margin-top: 6px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .area-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 14px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            /* Increased z-index */
+            display: none;
+        }
+
+        [data-theme="dark"] .area-suggestions {
+            background: var(--bg-card);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .area-suggestions.show {
+            display: block;
+            animation: fadeIn 0.2s;
+        }
+
+        .area-suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+            color: var(--text-main);
+        }
+
+        .area-suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .area-suggestion-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+
+
+        .area-suggestion-item.no-results {
+            cursor: default;
+            color: var(--text-sub);
+            text-align: center;
+        }
+
+        .area-suggestion-item.no-results:hover {
+            background: transparent;
+        }
+
+        /* App Info Styles */
+        .slider-container {
+            overflow: hidden;
+            touch-action: pan-y;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide {
+            min-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+        }
+
+        .info-dot {
+            transition: all 0.3s ease;
+        }
+
+        .info-dot.active {
+            transform: scale(1.3);
+        }
+
+        .smooth-color {
+            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                stroke 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @view-transition {
+            navigation: auto;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-body);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: pulseLogo 2s infinite;
+        }
+
+        @keyframes pulseLogo {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+
+</head>
+
+<body data-theme="light">
+
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="logo.png" alt="Logo" class="splash-logo">
+        </div>
+    </div>
+
+
+
+    <div id="view-landing" class="view-section">
+        <div class="landing-container">
+            <div class="logo-box">
+                <img src="logo.png" alt="Laundry Express Logo" class="logo-img-landing"
+                    onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-soap\' style=\'font-size:45px; color:#2A2F33\'></i>'">
+            </div>
+
+            <h1 class="landing-title">Laundry Express</h1>
+            <p class="landing-sub">Premium Care. Zero Hassle.</p>
+
+            <button class="btn-google" onclick="landingApp.handleGoogleAuth()">
+                <svg class="g-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                    <path fill="#EA4335"
+                        d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                    <path fill="#4285F4"
+                        d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <path fill="#FBBC05"
+                        d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <path fill="#34A853"
+                        d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                    <path fill="none" d="M0 0h48v48H0z" />
+                </svg>
+                Continue with Google
+            </button>
+        </div>
+    </div>
+
+    <div id="view-theme" class="view-section">
+        <div class="navbar"
+            style="position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-body); box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            <div class="nav-left" onclick="globalNav.switchView('account')"
+                style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px;">
+                <i class="fas fa-arrow-left" style="font-size: 18px;"></i>
+            </div>
+            <div class="nav-title"
+                style="flex: 1; text-align: center; font-size: 16px; font-weight: 600; padding-right: 40px;">Select
+                Theme</div>
+            <div class="nav-right" style="width: auto;">
+                <button class="save-btn" onclick="themeApp.saveTheme()"
+                    style="background: var(--primary-action); color: var(--primary-action-text); border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    Save
+                </button>
+            </div>
+        </div>
+
+        <div class="theme-list-container" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <!-- Light Theme -->
+            <!-- Light Theme (Aesthetic) -->
+            <div class="theme-card" onclick="themeApp.select('light')" id="theme-card-light">
+                <div style="font-weight: 600; font-size: 15px;">Aesthetic (Light)</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#f6e0b5; border: 1px solid #ccc;"></div> <!-- Bg -->
+                    <div class="theme-color-dot" style="background:#66545e;"></div> <!-- Text -->
+                    <div class="theme-color-dot" style="background:#aa6f73;"></div> <!-- Accent -->
+                </div>
+            </div>
+
+            <!-- Dark Theme (Updated) -->
+            <!-- Dark Theme (Updated) -->
+            <div class="theme-card" onclick="themeApp.select('dark')" id="theme-card-dark">
+                <div style="font-weight: 600; font-size: 15px;">Lavender (Dark)</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#e2dbe9; border: 1px solid #ccc;"></div>
+                    <!-- Light Background -->
+                    <div class="theme-color-dot" style="background:#3e204f;"></div> <!-- Dark Text -->
+                    <div class="theme-color-dot" style="background:#5a4565;"></div> <!-- Accent -->
+                </div>
+            </div>
+
+            <!-- Pastel Dream Theme (Previously Blue) -->
+            <div class="theme-card" onclick="themeApp.select('blue')" id="theme-card-blue">
+                <div style="font-weight: 600; font-size: 15px;">Baby Girl</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#fbf7f7; border: 1px solid #ccc;"></div> <!-- Bg -->
+                    <div class="theme-color-dot" style="background:#eedeff;"></div> <!-- Lavender -->
+                    <div class="theme-color-dot" style="background:#f4dae7;"></div> <!-- Pink -->
+                </div>
+            </div>
+
+            <!-- Forest Green Theme (Light Mode) -->
+            <div class="theme-card" onclick="themeApp.select('green')" id="theme-card-green">
+                <div style="font-weight: 600; font-size: 15px;">Nature (Light)</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#e4fde1; border: 1px solid #ccc;"></div>
+                    <!-- Light Bg -->
+                    <div class="theme-color-dot" style="background:#1b3022;"></div> <!-- Celtic Text -->
+                    <div class="theme-color-dot" style="background:#519872;"></div> <!-- Aqua Forest -->
+                </div>
+            </div>
+
+            <!-- Shades of Teal (Previously Urban Light) -->
+            <div class="theme-card" onclick="themeApp.select('purple')" id="theme-card-purple">
+                <div style="font-weight: 600; font-size: 15px;">Teal Gradient</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#b2d8d8; border: 1px solid #ccc;"></div>
+                    <!-- Powder Teal -->
+                    <div class="theme-color-dot" style="background:#66b2b2;"></div> <!-- Medium Teal -->
+                    <div class="theme-color-dot" style="background:#008080;"></div> <!-- Teal -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-login" class="view-section">
+        <div class="login-wrapper">
+            <div class="login-card">
+                <div class="progress-bar" id="progressBarContainer">
+                    <div class="progress-bar-fill" id="progressFill"></div>
+                    <div class="step-indicator active">1</div>
+                    <div class="step-indicator" id="step2Indicator">2</div>
+                </div>
+
+                <form id="profileForm" onsubmit="return false;">
+                    <div class="form-step active" id="step1">
+                        <h2>Profile Setup</h2>
+                        <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px;">We need a few details to
+                            serve you.</p>
+
+                        <div class="login-input-group">
+                            <label class="login-label" for="fullName">Full Name</label>
+                            <input class="login-input" type="text" id="fullName" placeholder="e.g. Rahul Sharma"
+                                required>
+                        </div>
+
+                        <div class="login-input-group">
+                            <label class="login-label" for="whatsapp">WhatsApp Number</label>
+                            <div class="phone-wrapper">
+                                <span class="country-code">+91</span>
+                                <input class="login-input" type="tel" id="whatsapp" placeholder="98765 43210"
+                                    pattern="[0-9]{10}" required>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" onclick="loginApp.nextStep()">Continue &rarr;</button>
+                    </div>
+
+                    <div class="form-step" id="step2">
+                        <button class="btn btn-secondary" onclick="loginApp.prevStep()">&larr; Back</button>
+                        <h2>Location Details</h2>
+                        <p style="color:var(--text-sub); font-size:0.9rem; margin-bottom:20px;">Where should we pick
+                            up/deliver?</p>
+
+                        <div class="login-input-group">
+                            <label class="login-label" for="areaSearch">Area / City</label>
+                            <div class="area-input-wrapper">
+                                <input class="login-input" type="text" id="areaSearch"
+                                    placeholder="Search for your area..." autocomplete="off" required>
+                                <div class="area-suggestions" id="areaSuggestions"></div>
+                            </div>
+                            <div class="error-message" id="areaError">Service not available in this area</div>
+                        </div>
+
+                        <div class="login-input-group">
+                            <label class="login-label" for="landmark">Flat No / Landmark</label>
+                            <input class="login-input" type="text" id="landmark"
+                                placeholder="e.g. Flat 4B, Near City Mall" required>
+                        </div>
+
+                        <button class="btn btn-primary" id="submitProfileBtn" onclick="loginApp.submitForm()">Complete
+                            Profile ✅</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-home" class="view-section active">
+
+        <div id="screen-products">
+            <div class="header">
+                <div class="header-left-group">
+                    <img src="app.png" alt="App Icon" class="app-icon-small" onerror="this.style.display='none'">
+                    <div>
+                        <div
+                            style="font-size: 10px; color: var(--text-sub); font-weight: 600; text-transform:uppercase; letter-spacing:0.5px;">
+                            Your Location</div>
+                        <div style="font-size: 13px; color: var(--text-main); font-weight: 700;">
+                            <i class="fas fa-map-marker-alt" style="color:var(--text-sub)"></i>
+                            <span id="home-address-display">Home - Patna</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-icon" onclick="globalNav.switchView('account')"><i class="far fa-user"></i></div>
+            </div>
+
+            <div class="tabs" id="tabs-container">
+                <div class="tab-glider"></div>
+                <div class="tab active" id="tab-men" onclick="homeApp.switchTab('Men')">MEN</div>
+                <div class="tab" id="tab-women" onclick="homeApp.switchTab('Women')">WOMEN</div>
+            </div>
+
+            <div class="app-container" id="product-list"></div>
+            <div style="height: 10px;"></div>
+
+            <div class="floating-bar" id="add-to-bag-bar">
+                <div>
+                    <div style="font-weight: 700; font-size: 15px; color: var(--text-main);"><span
+                            id="selection-count">0</span> items</div>
+                    <div style="font-size: 11px; color: var(--text-sub); opacity: 1;">selected</div>
+                </div>
+                <button class="add-btn" onclick="homeApp.commitBag()">Add to Bag <i
+                        class="fas fa-shopping-bag"></i></button>
+            </div>
+        </div>
+
+        <div id="screen-cart" class="hidden" style="min-height: 100vh;">
+            <div class="header">
+                <button class="back-btn" onclick="homeApp.navTo('home')"
+                    style="border:none; background:none; font-size:18px; color:var(--text-main)"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 style="color:var(--text-main); font-size: 16px;">Your Bags</h2>
+                <div style="width: 24px;"></div>
+            </div>
+
+            <div class="app-container" id="bags-container"></div>
+
+            <div class="app-container hidden" id="billing-section">
+                <div class="bill-details">
+                    <div class="bill-row"><span>Total Items</span> <span id="bill-total-count">0</span></div>
+                    <div class="bill-row"><span>Item Total</span> <span id="bill-item-total">₹0</span></div>
+                    <div class="bill-row"><span>Delivery Fee</span> <span id="bill-delivery">₹40</span></div>
+                    <div class="bill-row" style="font-size: 10px; color: var(--text-main);">
+                        <span id="delivery-note">* Free delivery on 20+ items</span>
+                    </div>
+                    <div class="bill-total"><span>Total to Pay</span><span id="bill-grand-total">₹0</span></div>
+                </div>
+                <div style="padding-top: 20px;">
+                    <button class="full-btn" id="main-pay-btn" onclick="homeApp.placeOrder()">Place Order</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="homeApp.navTo('home')">
+                <i class="fas fa-home"></i> <span>Home</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="homeApp.navTo('cart')">
+                <i class="fas fa-shopping-bag"></i> <span>Cart</span>
+                <div class="cart-badge-dot" id="cartBadge"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-orders" class="view-section">
+        <div class="header">
+            <button class="back-btn" onclick="globalNav.switchView('account')"
+                style="border:none; background:none; font-size:18px; color:var(--text-main); margin-right:10px;"><i
+                    class="fas fa-arrow-left"></i></button>
+            <h2 style="color:var(--text-main); font-size: 16px;">My Orders</h2>
+            <div style="width: 24px;"></div>
+        </div>
+
+        <div class="app-container" id="orders-list-container">
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="globalNav.switchView('home')">
+                <i class="fas fa-home"></i> <span>Home</span>
+            </div>
+            <div class="nav-item" onclick="globalNav.switchView('home'); setTimeout(()=> homeApp.navTo('cart'), 100);">
+                <i class="fas fa-shopping-bag"></i> <span>Cart</span>
+                <div class="cart-badge-dot" id="cartBadgeOrders"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-info" class="view-section">
+        <div id="info-app-container" class="smooth-color"
+            style="height: 100vh; width: 100%; display: flex; flex-direction: column;">
+            <!-- Header -->
+            <div id="info-header" class="header smooth-color"
+                style="border-bottom: 1px solid rgba(255,255,255,0.2); padding: 16px 16px;">
+                <button class="back-btn" onclick="globalNav.switchView('account')"
+                    style="border:none; background:none; font-size:16px; margin-right:10px; padding: 0;">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="smooth-color" style="font-size: 16px; margin: 0;">App Info</h2>
+                <div style="width: 24px;"></div>
+            </div>
+
+            <!-- Slider Container -->
+            <div class="slider-container">
+                <div id="info-slider" class="slider-wrapper">
+                    <!-- Slides will be injected here -->
+                </div>
+            </div>
+
+            <!-- Footer Navigation -->
+            <div id="info-footer" class="smooth-color"
+                style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.2); position: relative; z-index: 10;">
+                <button id="info-prev-btn" onclick="infoSlider.prev()" class="smooth-color"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; transition: opacity 0.3s;"
+                    disabled>‹</button>
+                <div id="info-dots" style="display: flex; gap: 12px;">
+                    <!-- Dots will be injected here -->
+                </div>
+                <button id="info-next-btn" onclick="infoSlider.next()" class="smooth-color"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; transition: opacity 0.3s;">›</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-account" class="view-section">
+        <div class="account-bg-layer">
+
+            <div class="ac-header">
+                <i class="fas fa-arrow-left" onclick="globalNav.switchView('home')" style="cursor:pointer"></i>
+                <span>Account</span>
+            </div>
+
+            <div class="profile-card-new" style="overflow:visible">
+                <div class="pc-banner">
+                    <div class="pc-edit-fab" onclick="accountApp.enableEdit()">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                </div>
+
+                <div class="pc-content">
+                    <div class="pc-avatar-new">
+                        <i class="far fa-user"></i>
+                    </div>
+
+                    <div id="static-info">
+                        <div class="pc-name" id="display-name">Loading...</div>
+                        <div class="pc-phone">
+                            <i class="fas fa-phone-alt" style="font-size:11px; opacity:0.7;"></i>
+                            <span id="display-phone">Loading...</span>
+                        </div>
+                        <div class="pc-phone" style="margin-top:6px; font-size:12px;">
+                            <i class="fas fa-map-marker-alt" style="font-size:11px; opacity:0.7;"></i>
+                            <span id="display-address">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div id="locked-profile-state" class="hidden" style="text-align: center; padding: 20px 0;">
+                        <div
+                            style="width: 60px; height: 60px; background: rgba(0,0,0,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                            <i class="fas fa-lock" style="font-size: 24px; color: var(--text-sub);"></i>
+                        </div>
+                        <div class="pc-name" style="margin-bottom: 8px;">Profile Locked</div>
+                        <div class="pc-phone" style="margin-bottom: 20px;">
+                            Please login to view your profile
+                        </div>
+                        <button class="btn-primary" onclick="accountApp.goToLogin()"
+                            style="width: auto; padding: 12px 32px; border-radius: 50px;">
+                            <i class="fas fa-sign-in-alt" style="margin-right: 8px;"></i>Login
+                        </button>
+                    </div>
+
+                    <div class="edit-form-overlay hidden" id="edit-form-container" style="margin-top:15px;">
+                        <div class="login-input-group">
+                            <label class="login-label">Full Name</label>
+                            <input class="login-input" type="text" id="inpName">
+                        </div>
+                        <div class="login-input-group">
+                            <label class="login-label">Phone</label>
+                            <input class="login-input" type="tel" id="inpPhone">
+                        </div>
+                        <div class="login-input-group">
+                            <label class="login-label">Address</label>
+                            <div class="area-input-wrapper">
+                                <input class="login-input" type="text" id="inpLoc" autocomplete="off">
+                                <div class="area-suggestions" id="accountAreaSuggestions"></div>
+                            </div>
+                            <div class="error-message" id="accountAreaError">Service not available in this area</div>
+                        </div>
+                        <div class="login-input-group">
+                            <label class="login-label">Landmark</label>
+                            <input class="login-input" type="text" id="inpLand">
+                        </div>
+                        <div class="action-btns" id="actionPanel" style="display:flex; gap:10px;">
+                            <button class="btn-cancel" onclick="accountApp.cancelEdit()">Cancel</button>
+                            <button class="btn-save" onclick="accountApp.confirmSave()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="st-header">Settings</div>
+
+                <div class="st-row" onclick="globalNav.switchView('orders')">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:rgba(33, 150, 243, 0.1); color:#2196F3"><i
+                                class="fas fa-clipboard-list"></i></div>
+                        <div class="st-info">
+                            <h4 style="font-size:14px; font-weight:600;">My Orders</h4>
+                            <p style="font-size:11px; color:var(--text-sub);">Recent activity</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sub); font-size:12px;"></i>
+                </div>
+
+
+
+                <div class="st-row" onclick="accountApp.showAppInfo()">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:#e4fde1; color:#1b3022"><i
+                                class="fas fa-info-circle"></i></div>
+                        <div class="st-info">
+                            <h4 style="font-size:14px; font-weight:600;">App Info</h4>
+                            <p style="font-size:11px; color:var(--text-sub);">Version, Features & Support</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sub); font-size:12px;"></i>
+                </div>
+
+                <div class="st-row" onclick="themeApp.open()">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:rgba(156, 39, 176, 0.1); color:#9c27b0"><i
+                                class="fas fa-palette"></i></div>
+                        <div class="st-info">
+                            <h4 style="font-size:14px; font-weight:600;">App Theme</h4>
+                            <p id="theme-label" style="font-size:11px; color:var(--text-sub);">Select your style</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sub); font-size:12px;"></i>
+                </div>
+
+
+
+                <div class="st-row" onclick="landingApp.confirmLogout()" style="cursor:pointer">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:#ffebee; color:#ef5350"><i
+                                class="fas fa-sign-out-alt"></i></div>
+                        <div class="st-info">
+                            <h4 style="color:#ef5350; font-size:14px; font-weight:600;">Logout</h4>
+                            <p style="font-size:11px; color:var(--text-sub);">Sign out of account</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal"
+            style="max-width: 600px; width: 90%; height: 80vh; max-height: 700px; padding: 0; overflow: hidden; border-radius: 24px;">
+            <div id="info-app-container"
+                style="height: 100%; width: 100%; display: flex; flex-direction: column; background: #e0f2fe;">
+                <!-- Header -->
+                <div id="info-header"
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; background: #bae6fd; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                    <button onclick="accountApp.closeAppInfo()"
+                        style="background: none; border: none; cursor: pointer; padding: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h1 style="font-size: 18px; font-weight: 700; color: #0c4a6e; margin: 0;">Info</h1>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <!-- Slider Container -->
+                <div style="flex: 1; overflow: hidden; position: relative;">
+                    <div id="info-slider"
+                        style="display: flex; height: 100%; transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+                        <!-- Page 1 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #0c4a6e; font-weight: 700; margin-bottom: 12px;">
+                                        The Solution to Laundry Day</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #0c4a6e; line-height: 1.7; opacity: 0.9;">Is your
+                                        laundry pile taking over your living space? Reclaim your weekends with our
+                                        innovative app. We handle the washing, drying, and folding so you can focus on
+                                        what truly matters.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 2 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #581c87; font-weight: 700; margin-bottom: 12px;">
+                                        Doorstep Convenience</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #581c87; line-height: 1.7; opacity: 0.9;">
+                                        Convenience is the heartbeat of our service. Our seamless pickup and delivery
+                                        system ensures you never have to step foot in a laundromat again. We work
+                                        entirely around your busy schedule.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 3 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #14532d; font-weight: 700; margin-bottom: 12px;">
+                                        Professional Care & Quality</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #14532d; line-height: 1.7; opacity: 0.9;">Your
+                                        clothes are always in expert hands with us. We use top-tier equipment and
+                                        premium detergents to ensure every garment returns to you fresh, clean, and
+                                        neatly folded.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 4 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #7c2d12; font-weight: 700; margin-bottom: 12px;">
+                                        Effortless App Experience</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #7c2d12; line-height: 1.7; opacity: 0.9;">Using
+                                        our app is incredibly intuitive and fast. With a user-friendly interface, you
+                                        can customize your washing preferences, track your order in real-time, and
+                                        manage payments securely.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 5 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #881337; font-weight: 700; margin-bottom: 12px;">
+                                        Affordable Pricing</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #881337; line-height: 1.7; opacity: 0.9;">Quality
+                                        laundry service should not break the bank. Our transparent pricing structure
+                                        offers exceptional value with no hidden fees. Enjoy premium care at prices that
+                                        respect your budget.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 6 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #134e4a; font-weight: 700; margin-bottom: 12px;">
+                                        Eco-Friendly Commitment</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #134e4a; line-height: 1.7; opacity: 0.9;">We care
+                                        about your clothes and our planet. Our green washing practices use biodegradable
+                                        detergents and energy-efficient machines that reduce water consumption.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Page 7 -->
+                        <div class="info-slide"
+                            style="min-width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px 20px;">
+                            <div style="max-width: 500px; text-align: center;">
+                                <div
+                                    style="background: rgba(255,255,255,0.4); backdrop-filter: blur(12px); border-radius: 32px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2);">
+                                    <h2 class="info-title"
+                                        style="font-size: 24px; color: #312e81; font-weight: 700; margin-bottom: 12px;">
+                                        Ready to Get Started?</h2>
+                                    <p class="info-text"
+                                        style="font-size: 16px; color: #312e81; line-height: 1.7; opacity: 0.9;">Join
+                                        thousands of satisfied customers who have already transformed their laundry
+                                        routine. Download our app today and enjoy your first order with a special
+                                        welcome discount.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div id="info-footer"
+                    style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #bae6fd; border-top: 1px solid rgba(255,255,255,0.2);">
+                    <button id="info-prev-btn" onclick="infoSlider.prev()"
+                        style="background: none; border: none; font-size: 32px; color: #0284c7; cursor: pointer; opacity: 0.3;"
+                        disabled>‹</button>
+                    <div id="info-dots" style="display: flex; gap: 12px;">
+                        <button class="info-dot active" onclick="infoSlider.goTo(0)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(1)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(2)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(3)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(4)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(5)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                        <button class="info-dot" onclick="infoSlider.goTo(6)"
+                            style="width: 12px; height: 12px; border-radius: 50%; border: none; background: #0284c7; opacity: 0.3; cursor: pointer; transition: all 0.3s;"></button>
+                    </div>
+                    <button id="info-next-btn" onclick="infoSlider.next()"
+                        style="background: none; border: none; font-size: 32px; color: #0284c7; cursor: pointer;">›</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3 data-key="confirmTitle">Confirm Changes?</h3>
+            <p data-key="confirmText" style="margin: 10px 0; color: var(--text-sub); font-size: 13px;">Are you
+                sure you
+                want to save these details?</p>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="accountApp.closeModal('confirmModal')" data-key="no">No</button>
+                <button class="btn-save" onclick="accountApp.saveData()" data-key="yes">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="logoutModal">
+        <div class="modal">
+            <h3 style="color:#e74c3c">Logout?</h3>
+            <p style="margin: 10px 0; color: var(--text-sub); font-size: 13px;">Are you sure you want to log out
+                of your
+                account?</p>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="accountApp.closeModal('logoutModal')">Cancel</button>
+                <button class="btn-save" style="background-color: #e74c3c;"
+                    onclick="landingApp.performLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="cancelOrderModal">
+        <div class="modal">
+            <h3 style="color:#C62828;"><i class="fas fa-exclamation-triangle"></i> Cancel Order?</h3>
+            <p style="font-size:13px; color: var(--text-sub); margin-top:10px;">Are you sure you want to cancel
+                this
+                order? This action cannot be undone.</p>
+            <p style="font-size: 12px; color: var(--text-main); margin-top: 8px; font-weight:600;">
+                Order ID: <span id="cancelModalOrderId"></span>
+            </p>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="ordersApp.closeCancelModal()">No, Keep It</button>
+                <button class="btn-save" style="background-color:#C62828;" onclick="ordersApp.confirmCancelOrder()">Yes,
+                    Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="order-success-view" id="orderSuccessView">
+        <div class="checkmark-circle">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 style="color:var(--text-main); margin-bottom:10px;">Order Placed!</h2>
+        <p style="color:var(--text-sub); margin-bottom:30px; font-size: 13px;">A pickup agent will be assigned
+            shortly.
+        </p>
+        <button class="btn btn-primary" style="max-width:200px;" onclick="homeApp.finishOrder()">Continue
+            Shopping</button>
+    </div>
+
+    <div id="toast">Data Saved Successfully!</div>
+
+    <script>
+
+        // Laundry Express App - Main JavaScript Logic
+
+        // --- 1. CONFIGURATION & SETUP ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCvfFJQNRhryu8v-ItgHWVGORxeI8jxNk",
+            authDomain: "final-express-trio.firebaseapp.com",
+            databaseURL: "https://final-express-trio-default-rtdb.firebaseio.com",
+            projectId: "final-express-trio",
+            storageBucket: "final-express-trio.firebasestorage.app",
+            messagingSenderId: "438360888346",
+            appId: "1:438360888346:web:2b8cd66cbaab4d09292da3"
+        };
+
+
+
+        // Initialize Firebase with safety check
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                var auth = firebase.auth();
+                var db = firebase.database();
+                var provider = new firebase.auth.GoogleAuthProvider();
+            } else {
+                console.error("Firebase SDK not loaded");
+                alert("Error loading app resources. Please check internet connection.");
+            }
+        } catch (e) { console.error(e); }
+
+        // --- 2. APP MODULES ---
+
+        const accountApp = {
+            originalValues: {},
+            enableEdit() {
+                document.getElementById('static-info').classList.add('hidden');
+                document.getElementById('edit-form-container').classList.remove('hidden');
+                document.getElementById('edit-form-container').classList.add('show');
+                this.originalValues = {
+                    name: document.getElementById('inpName').value,
+                    phone: document.getElementById('inpPhone').value,
+                    phone: document.getElementById('inpPhone').value,
+                    loc: document.getElementById('inpLoc').value,
+                    land: document.getElementById('inpLand').value
+                };
+
+                // Attach validation to the account address field
+                if (typeof areaValidation !== 'undefined') {
+                    areaValidation.attach('inpLoc', 'accountAreaSuggestions', 'accountAreaError');
+                }
+            },
+            cancelEdit() {
+                document.getElementById('inpName').value = this.originalValues.name;
+                document.getElementById('inpPhone').value = this.originalValues.phone;
+                document.getElementById('inpLoc').value = this.originalValues.loc;
+                document.getElementById('inpLand').value = this.originalValues.land;
+                this.exitEditMode();
+            },
+            exitEditMode() {
+                document.getElementById('edit-form-container').classList.add('hidden');
+                document.getElementById('static-info').classList.remove('hidden');
+            },
+            confirmSave() { document.getElementById('confirmModal').style.display = 'flex'; },
+            closeModal(id) { document.getElementById(id).style.display = 'none'; },
+            saveData() {
+                this.closeModal('confirmModal');
+                const currentUser = auth.currentUser;
+                if (currentUser) {
+                    const userData = landingApp.checkExistingUser() || {};
+                    userData.name = document.getElementById('inpName').value;
+                    userData.phone = document.getElementById('inpPhone').value;
+                    userData.address = document.getElementById('inpLoc').value;
+                    userData.landmark = document.getElementById('inpLand').value;
+
+                    // Validate area first
+                    const areaInput = document.getElementById('inpLoc').value.trim();
+                    if (!areaValidation.validateArea(areaInput, 'inpLoc', 'accountAreaError')) {
+                        accountApp.showToast("Service not available in this area");
+                        return;
+                    }
+
+                    db.ref('users/' + currentUser.uid).update(userData)
+                        .then(() => {
+                            localStorage.setItem('laundryUser', JSON.stringify(userData));
+                            globalNav.loadUserData(userData);
+                            this.exitEditMode();
+                            this.showToast("Data Saved Successfully! ✅");
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            this.showToast("Error saving data");
+                        });
+                }
+            },
+            showToast(msg) {
+                const x = document.getElementById("toast");
+                x.innerText = msg; x.className = "show";
+                setTimeout(() => x.className = x.className.replace("show", ""), 3000);
+            },
+            showAppInfo() {
+                globalNav.switchView('info');
+                // Initialize slider and apply colors immediately
+                setTimeout(() => infoSlider.init(), 10);
+            },
+            toggleTheme() {
+                const body = document.body;
+                const isDark = body.getAttribute('data-theme') === 'dark';
+                const newTheme = isDark ? 'light' : 'dark';
+                body.setAttribute('data-theme', newTheme);
+                document.getElementById('theme-toggle-check').checked = (newTheme === 'dark');
+                const textEl = document.querySelector('[data-key="themeSub"]');
+                if (textEl) textEl.innerText = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+            },
+            goToLogin() {
+                globalNav.switchView('landing');
+            },
+            updateProfileVisibility(isLoggedIn) {
+                const staticInfo = document.getElementById('static-info');
+                const lockedState = document.getElementById('locked-profile-state');
+                const editFab = document.querySelector('.pc-edit-fab');
+                const logoutRow = document.querySelector('[onclick="landingApp.confirmLogout()"]');
+
+                if (isLoggedIn) {
+                    // Show profile data
+                    if (staticInfo) staticInfo.classList.remove('hidden');
+                    if (lockedState) lockedState.classList.add('hidden');
+                    if (editFab) editFab.style.display = 'flex';
+                    if (logoutRow) logoutRow.style.display = 'flex';
+                } else {
+                    // Show locked state
+                    if (staticInfo) staticInfo.classList.add('hidden');
+                    if (lockedState) lockedState.classList.remove('hidden');
+                    if (editFab) editFab.style.display = 'none';
+                    if (logoutRow) logoutRow.style.display = 'none';
+                }
+            }
+        };
+
+        // --- THEME APP LOGIC ---
+        const themeApp = {
+            currentSelection: 'light', // Default
+
+            init() {
+                // Load from storage
+                const savedTheme = localStorage.getItem('laundryTheme') || 'light';
+                this.applyTheme(savedTheme);
+            },
+
+            applyTheme(themeName) {
+                // Remove all theme attributes
+                document.documentElement.removeAttribute('data-theme');
+                // Apply new if not light (default)
+                if (themeName !== 'light') {
+                    document.documentElement.setAttribute('data-theme', themeName);
+                }
+                this.currentSelection = themeName;
+                this.updateLabel(themeName);
+            },
+
+            open() {
+                globalNav.switchView('theme');
+                // Highlight current selection
+                this.select(this.currentSelection, false);
+            },
+
+            select(themeName, updateState = true) {
+                // Visual selection only (unless saving)
+                if (updateState) {
+                    this.currentSelection = themeName;
+                }
+
+                // Update UI cards
+                document.querySelectorAll('.theme-card').forEach(card => card.classList.remove('active'));
+                const targetCard = document.getElementById(`theme-card-${themeName}`);
+                if (targetCard) targetCard.classList.add('active');
+            },
+
+            saveTheme() {
+                this.applyTheme(this.currentSelection);
+                localStorage.setItem('laundryTheme', this.currentSelection);
+                globalNav.switchView('account');
+
+                // Optional: Show toast
+                if (accountApp && accountApp.showToast) {
+                    accountApp.showToast('Theme updated!');
+                }
+            },
+
+            updateLabel(themeName) {
+                const label = document.getElementById('theme-label');
+                if (!label) return;
+
+                const names = {
+                    'light': 'Light Mode',
+                    'dark': 'Dark Mode',
+                    'blue': 'Midnight Blue',
+                    'green': 'Forest Green',
+                    'purple': 'Royal Purple'
+                };
+                label.innerText = names[themeName] || 'Select your style';
+            }
+        };
+
+        // Info Slider with page themes - Updated for Green/Forest Palette & Logic
+        const infoSlider = {
+            currentPage: 0,
+            touchStartX: 0,
+            touchStartY: 0,
+
+            // Default configuration
+            defaultConfig: {
+                pages: [
+                    { title: 'The Solution to Laundry Day', text: 'Is your laundry pile taking over your living space? Reclaim your weekends with our innovative app. We handle the washing, drying, and folding so you can focus on what truly matters. No more hauling heavy bags or waiting for wash cycles to finish. Simply tap, schedule, and relax while we take care of the dirty work. Experience true freedom from chores.', icon: '🧺' },
+                    { title: 'Doorstep Convenience', text: 'Convenience is the heartbeat of our service. Our seamless pickup and delivery system ensures you never have to step foot in a laundromat again. Whether you are at home or the office, our friendly drivers come directly to your doorstep. We work entirely around your busy schedule, offering flexible time slots that fit perfectly into your life, morning or night.', icon: '🚪' },
+                    { title: 'Professional Care & Quality', text: 'Your clothes are always in expert hands with us. We use top-tier equipment and premium detergents to ensure every garment returns to you fresh, clean, and neatly folded. From delicate silks to heavy bedding, our professional team treats every item with the utmost care. Say goodbye to shrinking sweaters and fading colors, and hello to a wardrobe that looks brand new.', icon: '✨' },
+                    { title: 'Effortless App Experience', text: 'Using our app is incredibly intuitive and fast. With a user-friendly interface, you can customize your washing preferences, track your order in real-time, and manage payments securely. Need hypoallergenic soap or hang-dry service? Just select your options with a few distinct taps. We designed the entire process to be effortless, putting total control of your laundry right in your pocket.', icon: '📱' },
+                    { title: 'Affordable Pricing', text: 'Quality laundry service should not break the bank. Our transparent pricing structure offers exceptional value with no hidden fees. Choose from flexible plans that match your lifestyle, whether you need weekly service or occasional deep cleans. Enjoy premium care at prices that respect your budget, with special discounts for regular customers.', icon: '💰' },
+                    { title: 'Eco-Friendly Commitment', text: 'We care about your clothes and our planet. Our green washing practices use biodegradable detergents and energy-efficient machines that reduce water consumption. We partner with local sustainable initiatives and use electric vehicles for deliveries. Feel good knowing that every load you send helps support a cleaner, healthier environment for future generations.', icon: '🌿' },
+                    { title: 'Ready to Get Started?', text: 'Join thousands of satisfied customers who have already transformed their laundry routine. Download our app today and enjoy your first order with a special welcome discount. Let us prove how easy, convenient, and delightful laundry day can truly be. Your free time is waiting, and so are we. Welcome to the future of laundry care.', icon: '🚀' }
+                ]
+            },
+
+            // Dynamic Palette based on requirements
+            // Hint of Green: #e4fde1
+            // De York: #8acb88
+            // Aqua Forest: #519872
+            // Mineral Green: #3b5249
+            // Celtic: #1b3022
+
+            // Themes rotate for contrast
+            pageThemes: [
+                { bg: '#e4fde1', surface: '#e4fde1', text: '#1b3022', accent: '#3b5249' }, // Light Green BG -> Dark Text
+                { bg: '#3b5249', surface: '#3b5249', text: '#e4fde1', accent: '#8acb88' }, // Dark Mineral BG -> Light Text
+                { bg: '#e4fde1', surface: '#e4fde1', text: '#1b3022', accent: '#519872' }, // Light BG -> Dark Text (Accent Aqua)
+                { bg: '#1b3022', surface: '#1b3022', text: '#e4fde1', accent: '#8acb88' }, // Dark Celtic BG -> Light Text
+                { bg: '#8acb88', surface: '#8acb88', text: '#1b3022', accent: '#1b3022' }, // De York BG -> Dark Text
+                { bg: '#e4fde1', surface: '#e4fde1', text: '#1b3022', accent: '#3b5249' }, // Repeat Light
+                { bg: '#3b5249', surface: '#3b5249', text: '#e4fde1', accent: '#8acb88' }  // Repeat Dark
+            ],
+
+            get pages() {
+                // SDK Fallback Logic
+                if (window.elementSdk && window.elementSdk.config && window.elementSdk.config.pages) {
+                    return window.elementSdk.config.pages;
+                }
+                return this.defaultConfig.pages;
+            },
+
+            init() {
+                this.currentPage = 0;
+                this.renderSlides();
+                this.renderDots();
+                this.updateUI(); // Applies initial colors
+                this.setupSwipeHandlers();
+            },
+
+            createSlide(page) {
+                // Uses global theme CSS classes (.info-card)
+                return `
+                 <div class="slide" style="min-width: 100%;"> 
+                    <div style="max-width: 500px; text-align: center; padding: 0 20px;">
+                        <div class="info-card">
+                            <h2 class="info-title">${page.title}</h2>
+                            <p class="info-text">${page.text}</p>
+                        </div>
+                    </div>
+                 </div>`;
+            },
+
+            renderSlides() {
+                const slider = document.getElementById('info-slider');
+                if (!slider) return;
+                slider.innerHTML = this.pages.map((page, index) => this.createSlide(page)).join('');
+            },
+
+            renderDots() {
+                const dotsContainer = document.getElementById('info-dots');
+                if (!dotsContainer) return;
+                // Just empty dots initially, style updated in updateUI
+                dotsContainer.innerHTML = this.pages.map((_, index) => `
+                    <button class="info-dot" onclick="infoSlider.goTo(${index})"
+                        style="width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer; transition: all 0.3s;"
+                        aria-label="Go to slide ${index + 1}"></button>
+                `).join('');
+            },
+
+            updateSlidePosition() {
+                const slider = document.getElementById('info-slider');
+                if (slider) {
+                    slider.style.transform = `translateX(-${this.currentPage * 100}%)`;
+                }
+                this.updateUI();
+            },
+
+            updateUI() {
+                // Simplified Update UI: Relies on global CSS variables now.
+                // We mainly just update functionality or non-color attributes here.
+
+                // Update Container Background - Reset to use CSS variable
+                const container = document.getElementById('info-app-container');
+                if (container) {
+                    container.style.background = 'var(--bg-body)';
+                }
+
+                // Update Header - Reset styles
+                const header = document.getElementById('info-header');
+                if (header) {
+                    header.style.background = 'var(--bg-body)';
+                    header.style.borderColor = 'var(--border-color)';
+
+                    const h2 = header.querySelector('h2');
+                    if (h2) h2.style.color = 'var(--text-main)';
+                    const backBtn = header.querySelector('.back-btn');
+                    if (backBtn) backBtn.style.color = 'var(--text-main)';
+                }
+
+                // Update Footer
+                const footer = document.getElementById('info-footer');
+                if (footer) {
+                    footer.style.background = 'var(--bg-body)';
+                    footer.style.borderColor = 'var(--border-color)';
+                }
+
+                // Update Dots - Active dot uses primary action color
+                const dots = document.querySelectorAll('.info-dot');
+                dots.forEach((dot, index) => {
+                    if (index === this.currentPage) {
+                        dot.style.background = 'var(--primary-action)';
+                        dot.style.opacity = '1';
+                    } else {
+                        dot.style.background = 'var(--text-sub)';
+                        dot.style.opacity = '0.3';
+                    }
+                });
+
+                // Update Arrows
+                const prevBtn = document.getElementById('info-prev-btn');
+                const nextBtn = document.getElementById('info-next-btn');
+                if (prevBtn) prevBtn.style.color = 'var(--primary-action)';
+                if (nextBtn) nextBtn.style.color = 'var(--primary-action)';
+            },
+
+
+            next() {
+                if (this.currentPage < this.pages.length - 1) {
+                    this.currentPage++;
+                    this.updateSlidePosition();
+                }
+            },
+
+            prev() {
+                if (this.currentPage > 0) {
+                    this.currentPage--;
+                    this.updateSlidePosition();
+                }
+            },
+
+            goTo(index) {
+                if (index >= 0 && index < this.pages.length) {
+                    this.currentPage = index;
+                    this.updateSlidePosition();
+                }
+            },
+
+            // Interaction Handlers (Swipe & Click)
+            setupSwipeHandlers() {
+                const container = document.getElementById('info-app-container');
+                if (!container) return;
+
+                let startX = 0;
+                let startY = 0;
+                let isDragging = false;
+                let lastTouchTime = 0; // Flag to ignore mouse events after touch
+
+                const handleStart = (e) => {
+                    // Ignore if touching a button or interactive element
+                    if (e.target.closest('button') || e.target.closest('.info-dot')) {
+                        return;
+                    }
+
+                    // Ignore mouse events if a touch recently happened (within 800ms)
+                    if (e.type.includes('mouse') && Date.now() - lastTouchTime < 800) return;
+
+                    if (e.type === 'touchstart') {
+                        lastTouchTime = Date.now();
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                    } else {
+                        startX = e.clientX;
+                        startY = e.clientY;
+                    }
+                    isDragging = true;
+                };
+
+                const handleEnd = (e) => {
+                    if (!isDragging) return;
+                    isDragging = false;
+
+                    // Ignore mouse events if a touch recently happened
+                    if (e.type.includes('mouse') && Date.now() - lastTouchTime < 800) return;
+
+                    let endX = 0;
+                    let endY = 0;
+
+                    if (e.type.includes('mouse')) {
+                        endX = e.clientX;
+                        endY = e.clientY;
+                    } else {
+                        endX = e.changedTouches[0].clientX;
+                        endY = e.changedTouches[0].clientY;
+                    }
+
+                    const diffX = endX - startX;
+                    const diffY = endY - startY;
+
+                    // Tap Detection (< 15px movement)
+                    if (Math.abs(diffX) < 15 && Math.abs(diffY) < 15) {
+                        const screenWidth = window.innerWidth;
+                        // Left 40% -> Previous
+                        if (startX < screenWidth * 0.4) {
+                            this.prev();
+                        } else {
+                            // Right 60% -> Next
+                            this.next();
+                        }
+                    }
+                    // Swipe Detection (> 50px)
+                    else if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+                        if (diffX > 0) this.prev();
+                        else this.next();
+                    }
+                };
+
+                container.onmousedown = handleStart;
+                container.ontouchstart = handleStart;
+                container.onmouseup = handleEnd;
+                container.ontouchend = handleEnd;
+            }
+        };
+
+        const landingApp = {
+            checkExistingUser: () => {
+                const userData = localStorage.getItem('laundryUser');
+                return userData ? JSON.parse(userData) : null;
+            },
+            checkDbAndRedirect: (user) => {
+                const uid = user.uid;
+                const userRef = db.ref('users/' + uid);
+                userRef.once('value').then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        localStorage.setItem('laundryUser', JSON.stringify(userData));
+                        globalNav.loadUserData(userData);
+                        globalNav.switchView('home');
+                        if (typeof ordersApp !== 'undefined') ordersApp.init();
+                    } else {
+                        document.getElementById('view-landing').classList.remove('active');
+                        document.getElementById('view-login').classList.add('active');
+                    }
+                }).catch((error) => {
+                    console.error("Database error:", error);
+                    accountApp.showToast("Error connecting to database.");
+                });
+            },
+            initGoogleOneTap: () => {
+                console.log("Initializing Google One Tap...");
+                if (typeof google === 'undefined') {
+                    console.warn("Google Identity Services script not loaded yet. Retrying...");
+                    setTimeout(landingApp.initGoogleOneTap, 500);
+                    return;
+                }
+                console.log("Google script found. Setting up client...");
+                try {
+                    google.accounts.id.initialize({
+                        client_id: "438360888346-itvhpt9dd0450kg1v9mms8fg7t7viu0t.apps.googleusercontent.com",
+                        callback: landingApp.handleCredentialResponse,
+                        auto_select: true,
+                        cancel_on_tap_outside: false
+                    });
+                    console.log("Client initialized. Requesting prompt...");
+                    google.accounts.id.prompt((notification) => {
+                        console.log("Prompt notification received:", notification);
+                        if (notification.isNotDisplayed()) {
+                            console.error("One Tap NOT displayed. Reason:", notification.getNotDisplayedReason());
+                        } else if (notification.isSkippedMoment()) {
+                            console.warn("One Tap skipped. Reason:", notification.getSkippedReason());
+                        } else {
+                            console.log("One Tap displayed successfully.");
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error during One Tap initialization:", e);
+                }
+            },
+            handleCredentialResponse: (response) => {
+                console.log("Credential response received from Google:", response);
+                if (!response.credential) {
+                    console.error("No credential token received!");
+                    return;
+                }
+                console.log("Creating Firebase credential...");
+                const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+                console.log("Signing into Firebase...");
+                auth.signInWithCredential(credential)
+                    .then((result) => {
+                        console.log("Firebase Sign-In Successful:", result);
+                        accountApp.showToast("Logged in successfully!");
+                    })
+                    .catch((error) => {
+                        console.error("Firebase Auth Error:", error);
+                        console.error("Error Code:", error.code);
+                        console.error("Error Message:", error.message);
+                        accountApp.showToast("Login Failed: " + error.message);
+                    });
+            },
+            handleGoogleAuth: () => {
+                // Trigger the Google One Tap prompt manually if the button is clicked
+                google.accounts.id.prompt();
+            },
+            confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
+            performLogout: () => {
+                auth.signOut().then(() => {
+                    localStorage.removeItem('laundryUser');
+                    if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
+                    location.reload();
+                }).catch((error) => { console.error("Sign Out Error", error); });
+            }
+        };
+
+        const globalNav = {
+            loadUserData: (user) => {
+                if (!user) return;
+                document.getElementById('inpName').value = user.name || "";
+                document.getElementById('inpPhone').value = user.phone || "";
+                document.getElementById('inpLoc').value = (user.address && user.address.includes(',')) ? user.address.split(',')[1] : (user.address || "");
+                document.getElementById('inpLand').value = user.landmark || "";
+                document.getElementById('display-name').innerText = user.name || "Guest";
+                document.getElementById('display-phone').innerText = user.phone ? "+91 " + user.phone : "No Phone";
+                let shortAddr = "No Address";
+                if (user.address) {
+                    shortAddr = user.address.length > 25 ? user.address.substring(0, 25) + "..." : user.address;
+                }
+                document.getElementById('display-address').innerText = shortAddr;
+                document.getElementById('home-address-display').innerText = shortAddr;
+            },
+            goToApp: () => {
+                const currentUser = auth.currentUser;
+                if (!currentUser) { accountApp.showToast("Authentication Error. Please restart."); return; }
+                const userData = {
+                    uid: currentUser.uid,
+                    name: document.getElementById('fullName').value,
+                    phone: document.getElementById('whatsapp').value,
+                    address: document.getElementById('areaSearch').value,  // Changed from 'address' to 'areaSearch'
+                    landmark: document.getElementById('landmark').value,
+                    email: currentUser.email
+                };
+                const btn = document.querySelector('#step2 .btn-primary');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = "Saving...";
+                db.ref('users/' + currentUser.uid).set(userData)
+                    .then(() => {
+                        localStorage.setItem('laundryUser', JSON.stringify(userData));
+                        document.getElementById('view-login').classList.remove('active');
+                        document.getElementById('view-home').classList.add('active');
+                        globalNav.loadUserData(userData);
+                        accountApp.showToast("Welcome!");
+                        if (typeof ordersApp !== 'undefined') ordersApp.init();
+                    })
+                    .catch((error) => {
+                        console.error("Save Error:", error);
+                        accountApp.showToast("Failed to save data.");
+                        btn.innerHTML = originalText;
+                    });
+            },
+            switchView: (viewName, addHistory = true) => {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+
+                const targetView = document.getElementById('view-' + viewName);
+                if (targetView) {
+                    targetView.classList.add('active');
+                }
+
+                if (viewName === 'home') {
+                    homeApp.navTo('home', false);
+                } else if (viewName === 'orders') {
+                    if (typeof ordersApp !== 'undefined') ordersApp.init();
+                }
+
+                if (addHistory) {
+                    history.pushState({ view: viewName }, '', '#' + viewName);
+                }
+            }
+        };
+
+        const ordersApp = {
+            data: [],
+            currentCancelOrder: null,
+            init() {
+                const user = auth.currentUser;
+                if (!user) return;
+                const ordersRef = db.ref('orders').orderByChild('userId').equalTo(user.uid);
+                ordersRef.on('value', (snapshot) => {
+                    this.data = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((child) => {
+                            const orderData = child.val();
+                            orderData.firebaseKey = child.key;
+                            this.data.push(orderData);
+                        });
+                        this.data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    }
+                    this.render();
+                });
+            },
+            showCancelModal(orderId, firebaseKey) {
+                this.currentCancelOrder = { id: orderId, key: firebaseKey };
+                document.getElementById('cancelModalOrderId').textContent = orderId;
+                document.getElementById('cancelOrderModal').style.display = 'flex';
+            },
+            closeCancelModal() {
+                document.getElementById('cancelOrderModal').style.display = 'none';
+                this.currentCancelOrder = null;
+            },
+            confirmCancelOrder() {
+                if (!this.currentCancelOrder) return;
+                const { id, key } = this.currentCancelOrder;
+                db.ref('orders/' + key).update({ status: 'Cancelled' })
+                    .then(() => {
+                        console.log('✅ Order cancelled:', id);
+                        accountApp.showToast('Order Cancelled Successfully');
+                        this.closeCancelModal();
+                    })
+                    .catch((error) => {
+                        console.error('❌ Failed to cancel order:', error);
+                        accountApp.showToast('Failed to cancel order. Please try again.');
+                    });
+            },
+            render() {
+                const container = document.getElementById('orders-list-container');
+                container.innerHTML = '';
+                if (this.data.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:50px; color:var(--text-sub); font-size: 13px;">
+                            <i class="fas fa-box-open" style="font-size:50px; margin-bottom:15px; opacity:0.3"></i>
+                            <p>No orders found.</p>
+                        </div>`;
+                    return;
+                }
+                this.data.forEach(order => {
+                    const status = order.status || 'Pick in 3 hr';
+                    const statusLower = status.toLowerCase();
+                    let statusClass = 'processing';
+                    if (statusLower.includes('delivered')) statusClass = 'completed';
+                    else if (statusLower.includes('cancelled')) statusClass = 'cancelled';
+
+                    const canCancel = statusLower === 'pick in 3 hr' || statusLower === 'processing' || statusLower === 'pending';
+                    const cancelBtn = canCancel ? `
+                        <button class="btn-cancel-order" onclick="ordersApp.showCancelModal('${order.id}', '${order.firebaseKey}')">
+                            <i class="fas fa-times-circle"></i> Cancel
+                        </button>` : '';
+
+                    let bagsHtml = '';
+                    if (order.bags && order.bags.length > 0) {
+                        order.bags.forEach((bag, index) => {
+                            let servicesBadges = '';
+                            if (bag.services && bag.services.length > 0) {
+                                servicesBadges = bag.services.map(s => `<span class="service-tag ${s.toLowerCase()}">${s.toUpperCase()}</span>`).join('');
+                            } else { servicesBadges = `<span class="service-tag wash">WASH</span>`; }
+                            let itemsListHtml = '';
+                            if (bag.items && bag.items.length > 0) {
+                                bag.items.forEach(item => {
+                                    itemsListHtml += `
+                                        <div class="bag-item-row">
+                                            <span>${item.name}</span>
+                                            <span class="item-qty-pill">x${item.qty}</span>
+                                        </div>`;
+                                });
+                            }
+                            bagsHtml += `
+                                <div class="order-bag-section">
+                                    <div class="bag-meta-row">
+                                        <span class="bag-name-title">${bag.name || 'BAG ' + (index + 1)}</span>
+                                        <div class="service-tags-container">${servicesBadges}</div>
+                                    </div>
+                                    <div class="bag-items-grid">${itemsListHtml}</div>
+                                </div>`;
+                        });
+                    } else {
+                        let itemStr = 'No items';
+                        if (order.items) { itemStr = order.items.map(i => `${i.name} x${i.qty}`).join(', '); }
+                        bagsHtml = `
+                            <div class="order-bag-section">
+                                <div class="bag-meta-row"><span class="bag-name-title">Items</span></div>
+                                <div style="font-size:12px; color:var(--text-main);">${itemStr}</div>
+                            </div>`;
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'order-card';
+                    div.setAttribute('data-status', status);
+                    div.innerHTML = `
+                        <div class="oc-row-top">
+                            <div>
+                                <span class="oc-date">${new Date(order.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                <span class="oc-id">#${order.id}</span>
+                            </div>
+                            <span class="oc-price">${order.total}</span>
+                        </div>
+                        ${bagsHtml}
+                        <div class="oc-row-actions">
+                            <span class="oc-status ${statusClass}">${status}</span>
+                            ${cancelBtn}
+                        </div>`;
+                    container.appendChild(div);
+                });
+            }
+        };
+
+        const areaValidation = {
+            availableAreas: [],
+
+            init() {
+                this.fetchAreas();
+            },
+
+            attach(inputId, suggestionsId, errorId) {
+                const areaInput = document.getElementById(inputId);
+
+                if (areaInput) {
+                    // clone node to remove previous listeners if any (simple way to reset)
+                    // But here we might just want to ensure we don't double bind. 
+                    // For simplicity, we'll assume attach is safe or just override oninput.
+
+                    areaInput.oninput = (e) => {
+                        const value = e.target.value.trim();
+                        if (value.length > 0) {
+                            this.showSuggestions(value, suggestionsId, inputId, errorId);
+                        } else {
+                            this.hideSuggestions(suggestionsId);
+                            this.clearValidation(inputId, errorId);
+                        }
+                    };
+
+                    areaInput.onblur = () => {
+                        setTimeout(() => {
+                            const value = areaInput.value.trim();
+                            if (value.length > 0) {
+                                this.validateArea(value, inputId, errorId);
+                            }
+                            this.hideSuggestions(suggestionsId);
+                        }, 200);
+                    };
+
+                    areaInput.onfocus = (e) => {
+                        const value = e.target.value.trim();
+                        if (value.length > 0) {
+                            this.showSuggestions(value, suggestionsId, inputId, errorId);
+                        }
+                    };
+                }
+            },
+
+            fetchAreas() {
+                if (typeof db !== 'undefined') {
+                    db.ref('serviceAreas').once('value')
+                        .then((snapshot) => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.val();
+                                if (Array.isArray(data)) {
+                                    this.availableAreas = data;
+                                } else if (typeof data === 'object') {
+                                    this.availableAreas = Object.values(data);
+                                }
+                                console.log('✅ Loaded service areas:', this.availableAreas);
+                            } else {
+                                this.availableAreas = [];
+                                console.log('⚠️ No service areas found in database.');
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error fetching areas from DB:', error);
+                            this.availableAreas = [];
+                        });
+                }
+            },
+
+            showSuggestions(input, suggestionsId, inputId, errorId) {
+                const suggestionsBox = document.getElementById(suggestionsId);
+                const filtered = this.filterAreas(input);
+
+                suggestionsBox.innerHTML = '';
+
+                if (filtered.length > 0) {
+                    filtered.forEach(area => {
+                        const item = document.createElement('div');
+                        item.className = 'area-suggestion-item';
+                        item.textContent = area;
+                        item.onclick = () => this.selectArea(area, inputId, suggestionsId, errorId);
+                        suggestionsBox.appendChild(item);
+                    });
+                    suggestionsBox.classList.add('show');
+                } else {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'area-suggestion-item no-results';
+                    noResults.textContent = 'No areas found';
+                    suggestionsBox.appendChild(noResults);
+                    suggestionsBox.classList.add('show');
+                }
+            },
+
+            hideSuggestions(suggestionsId) {
+                const suggestionsBox = document.getElementById(suggestionsId);
+                if (suggestionsBox) suggestionsBox.classList.remove('show');
+            },
+
+            filterAreas(input) {
+                const searchTerm = input.toLowerCase();
+                return this.availableAreas.filter(area =>
+                    area.toLowerCase().includes(searchTerm)
+                ).slice(0, 5);
+            },
+
+            selectArea(area, inputId, suggestionsId, errorId) {
+                const areaInput = document.getElementById(inputId);
+                areaInput.value = area;
+                this.hideSuggestions(suggestionsId);
+                this.validateArea(area, inputId, errorId);
+            },
+
+            validateArea(input, inputId, errorId) {
+                const areaInput = document.getElementById(inputId);
+                const errorMsg = document.getElementById(errorId);
+
+                const isValid = this.availableAreas.some(area =>
+                    area.toLowerCase() === input.toLowerCase()
+                );
+
+                if (isValid) {
+                    areaInput.classList.remove('error');
+                    areaInput.classList.add('valid');
+                    if (errorMsg) errorMsg.classList.remove('show');
+                } else {
+                    areaInput.classList.remove('valid');
+                    areaInput.classList.add('error');
+                    if (errorMsg) errorMsg.classList.add('show');
+                }
+
+                return isValid;
+            },
+
+            clearValidation(inputId, errorId) {
+                const areaInput = document.getElementById(inputId);
+                const errorMsg = document.getElementById(errorId);
+                areaInput.classList.remove('error', 'valid');
+                if (errorMsg) errorMsg.classList.remove('show');
+            }
+        };
+
+        const loginApp = {
+            nextStep: () => {
+                const name = document.getElementById('fullName').value;
+                const phone = document.getElementById('whatsapp').value;
+                if (name === "" || phone === "") { accountApp.showToast("Please fill in all fields."); return; }
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('step2Indicator').classList.add('active');
+                document.getElementById('progressFill').style.width = "100%";
+                // Initialize area validation when entering step 2
+                if (typeof areaValidation !== 'undefined') {
+                    areaValidation.attach('areaSearch', 'areaSuggestions', 'areaError');
+                }
+            },
+            prevStep: () => {
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step2Indicator').classList.remove('active');
+                document.getElementById('progressFill').style.width = "0%";
+            },
+            submitForm: () => {
+                const areaInput = document.getElementById('areaSearch').value.trim();
+                const landmark = document.getElementById('landmark').value;
+
+                // Validate area first
+                if (areaInput === "" || landmark === "") {
+                    accountApp.showToast("Please provide all location details.");
+                    return;
+                }
+
+                // Check if area is valid
+                if (!areaValidation.validateArea(areaInput, 'areaSearch', 'areaError')) {
+                    accountApp.showToast("Service not available in this area");
+                    return;
+                }
+
+                globalNav.goToApp();
+            }
+        };
+
+        const homeApp = {
+            data: {
+                activeTab: 'Men',
+                products: [], // Loaded from Firebase
+                tempSelection: {},
+                bags: [],
+                longPressTimer: null,
+                pinnedMap: {}
+            },
+            init() { this.fetchProducts(); },
+            fetchPinnedItems() {
+                const user = auth.currentUser;
+                if (!user) { this.data.pinnedMap = {}; return; }
+                db.ref('users/' + user.uid + '/pinned').on('value', (snapshot) => {
+                    this.data.pinnedMap = snapshot.val() || {};
+                    this.renderProducts();
+                });
+            },
+            fetchProducts() {
+                const productsRef = db.ref('products');
+                productsRef.on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (!val) {
+                        console.log("No products found in DB");
+                        this.data.products = [];
+                    } else if (Array.isArray(val)) {
+                        this.data.products = val;
+                    } else {
+                        // Handle object with numeric keys or random keys
+                        this.data.products = Object.values(val);
+                    }
+                    console.log("Loaded products:", this.data.products);
+                    this.renderProducts();
+                }, (error) => {
+                    console.error("Error loading products:", error);
+                });
+            },
+            navTo(screen, addHistory = true) {
+                // Select the bottom navigation bar within the home view
+                const bottomNav = document.querySelector('#view-home .bottom-nav');
+
+                if (screen === 'home') {
+                    document.getElementById('screen-products').classList.remove('hidden');
+                    document.getElementById('screen-cart').classList.add('hidden');
+
+                    // Ensure navigation bar is visible
+                    if (bottomNav) bottomNav.style.display = 'flex';
+
+                    document.getElementById('nav-home').classList.add('active');
+                    document.getElementById('nav-cart').classList.remove('active');
+                    this.renderProducts();
+                } else {
+                    document.getElementById('screen-products').classList.add('hidden');
+                    document.getElementById('screen-cart').classList.remove('hidden');
+
+                    // Ensure navigation bar remains visible
+                    if (bottomNav) bottomNav.style.display = 'flex';
+
+                    document.getElementById('nav-home').classList.remove('active');
+                    document.getElementById('nav-cart').classList.add('active');
+                    this.renderCart();
+                }
+
+                if (addHistory) {
+                    history.pushState({ view: 'home', subView: screen }, '', '#home/' + screen);
+                }
+
+            },
+            switchTab(category, direction = 'none') {
+                const previousTab = this.data.activeTab;
+                this.data.activeTab = category;
+
+                // Update Slider Position Class
+                const tabsContainer = document.getElementById('tabs-container');
+                if (category === 'Women') {
+                    tabsContainer.classList.add('active-women');
+                } else {
+                    tabsContainer.classList.remove('active-women');
+                }
+
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.getElementById(category === 'Men' ? 'tab-men' : 'tab-women').classList.add('active');
+
+                // Add slide animation based on direction
+                const productList = document.getElementById('product-list');
+                if (direction === 'left' && previousTab !== category) {
+                    productList.classList.remove('slide-right-enter');
+                    productList.classList.add('slide-left-enter');
+                } else if (direction === 'right' && previousTab !== category) {
+                    productList.classList.remove('slide-left-enter');
+                    productList.classList.add('slide-right-enter');
+                }
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    productList.classList.remove('slide-left-enter', 'slide-right-enter');
+                }, 400);
+
+                this.renderProducts();
+            },
+            startPress(e, id) {
+                // Clear any existing timer to prevent overlaps
+                this.cancelPress();
+
+                // Visual feedback (optional: add scaling or highlight class)
+                const card = e.currentTarget;
+                card.style.transform = "scale(0.96)";
+
+                this.data.longPressTimer = setTimeout(() => {
+                    this.togglePin(id);
+                    // Reset visual
+                    card.style.transform = "scale(1)";
+                }, 600); // Reduced to 600ms for better responsiveness
+            },
+            cancelPress(e) {
+                if (this.data.longPressTimer) {
+                    clearTimeout(this.data.longPressTimer);
+                    this.data.longPressTimer = null;
+                }
+
+                // Reset visual feedback on all cards (safest)
+                if (e && e.currentTarget) {
+                    e.currentTarget.style.transform = "scale(1)";
+                } else {
+                    document.querySelectorAll('.product-card').forEach(c => c.style.transform = "scale(1)");
+                }
+            },
+            handleTouchMove(e) {
+                // If the user scrolls, cancel the long press
+                this.cancelPress(e);
+            },
+            togglePin(id) {
+                const user = auth.currentUser;
+                if (!user) {
+                    accountApp.showToast("Please login to pin items");
+                    return;
+                }
+                // Haptic feedback for success
+                if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+
+                const isPinned = !!(this.data.pinnedMap && this.data.pinnedMap[id]);
+                const updates = {};
+                if (isPinned) {
+                    updates['users/' + user.uid + '/pinned/' + id] = null;
+                    accountApp.showToast("Item unpinned");
+                } else {
+                    updates['users/' + user.uid + '/pinned/' + id] = true;
+                    accountApp.showToast("Item pinned to top");
+                }
+
+                db.ref().update(updates).catch(err => {
+                    console.error("Pinning error", err);
+                    accountApp.showToast("Error updating pin");
+                });
+            },
+            renderProducts() {
+                const list = document.getElementById('product-list');
+                list.innerHTML = '';
+                const pinnedMap = this.data.pinnedMap || {};
+
+                // Filter by category
+                let visibleProducts = this.data.products.filter(p => p.cat === this.data.activeTab);
+
+                const pinned = visibleProducts.filter(p => pinnedMap[p.id]);
+                const unpinned = visibleProducts.filter(p => !pinnedMap[p.id]);
+
+                const createCard = (p, isPinned) => {
+                    const currentQty = this.data.tempSelection[p.id] || 0;
+                    const card = document.createElement('div');
+                    card.className = `product-card ${isPinned ? 'pinned' : ''}`;
+
+                    // Prevent context menu (right click) on mobile
+                    card.oncontextmenu = (e) => { e.preventDefault(); return false; };
+
+                    // Mouse Events
+                    card.onmousedown = (e) => this.startPress(e, p.id);
+                    card.onmouseup = (e) => this.cancelPress(e);
+                    card.onmouseleave = (e) => this.cancelPress(e);
+
+                    // Touch Events
+                    card.ontouchstart = (e) => {
+                        // e.preventDefault(); // Do not prevent default, we want scrolling to work
+                        this.startPress(e, p.id);
+                    };
+                    card.ontouchend = (e) => this.cancelPress(e);
+                    card.ontouchmove = (e) => this.handleTouchMove(e);
+
+                    card.innerHTML = `
+                        ${isPinned ? '<div class="pin-badge"><i class="fas fa-thumbtack"></i></div>' : ''}
+                        <div class="prod-info">
+                            <div class="prod-img-box">
+                                <img src="${p.img}" class="prod-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <i class="fas ${p.icon} prod-img-fallback"></i>
+                            </div>
+                            <div class="prod-details"><h3>${p.name}</h3><p>Premium Care</p></div>
+                        </div>
+                        <div class="counter">
+                            <div class="btn-count" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp(${p.id}, -1)">−</div>
+                            <span class="count-val">${currentQty}</span>
+                            <div class="btn-count active" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp(${p.id}, 1)">+</div>
+                        </div>`;
+                    return card;
+                };
+
+                if (pinned.length > 0) {
+                    // Just append pinned items first, no text headers
+                    pinned.forEach(p => list.appendChild(createCard(p, true)));
+
+                    // Optional: Add a subtle visual divider if needed, or just space
+                    if (unpinned.length > 0) {
+                        const divider = document.createElement('div');
+                        divider.style.height = "10px"; // Small gap
+                        list.appendChild(divider);
+                    }
+                }
+
+                unpinned.forEach(p => list.appendChild(createCard(p, false)));
+                this.updateFloatingBar();
+            },
+            updateTemp(id, change) {
+                if (navigator.vibrate) navigator.vibrate(20);
+                if (!this.data.tempSelection[id]) this.data.tempSelection[id] = 0;
+                this.data.tempSelection[id] += change;
+                if (this.data.tempSelection[id] <= 0) delete this.data.tempSelection[id];
+                this.renderProducts();
+            },
+            updateFloatingBar() {
+                const bar = document.getElementById('add-to-bag-bar');
+                let total = 0;
+                Object.values(this.data.tempSelection).forEach(qty => total += qty);
+                document.getElementById('selection-count').innerText = total;
+                if (total > 0) bar.classList.add('show'); else bar.classList.remove('show');
+                this.updateCartBadge();
+            },
+            updateCartBadge() {
+                const hasItems = this.data.bags.length > 0;
+                document.getElementById('cartBadge').style.display = hasItems ? 'block' : 'none';
+                document.getElementById('cartBadgeOrders').style.display = hasItems ? 'block' : 'none';
+            },
+            commitBag() {
+                const newBagItems = [];
+                for (const [id, qty] of Object.entries(this.data.tempSelection)) {
+                    const prod = this.data.products.find(p => p.id == id);
+                    newBagItems.push({ ...prod, qty: qty });
+                }
+                this.data.bags.push({ id: Date.now(), name: `BAG ${this.data.bags.length + 1}`, items: newBagItems, services: ['wash'] });
+                this.data.tempSelection = {};
+                this.renderProducts();
+                document.getElementById('add-to-bag-bar').classList.remove('show');
+                accountApp.showToast("Items added to Cart");
+                this.updateCartBadge();
+            },
+            renderCart() {
+                const container = document.getElementById('bags-container');
+                const billSection = document.getElementById('billing-section');
+                container.innerHTML = '';
+                if (this.data.bags.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:50px; color:var(--text-sub);">
+                            <i class="fas fa-shopping-basket" style="font-size:50px; color:rgba(0,0,0,0.1); margin-bottom:15px;"></i>
+                            <p style="font-size:14px;">Your cart is empty</p>
+                        </div>`;
+                    billSection.classList.add('hidden');
+                    return;
+                }
+                billSection.classList.remove('hidden');
+                this.data.bags.forEach((bag, bagIndex) => {
+                    let bagTotal = 0;
+                    let itemsHtml = '';
+                    bag.items.forEach(item => {
+                        let itemUnitCost = 0;
+                        bag.services.forEach(s => itemUnitCost += item.prices[s]);
+                        bagTotal += (itemUnitCost * item.qty);
+                        itemsHtml += `
+                            <div class="bag-item">
+                                <div><span style="font-weight:600; color:var(--text-main)">${item.name}</span> <span class="item-badge">x${item.qty}</span></div>
+                                <span class="price-tag">₹${itemUnitCost * item.qty}</span>
+                            </div>`;
+                    });
+                    const bagDiv = document.createElement('div');
+                    bagDiv.className = 'bag-card';
+                    bagDiv.innerHTML = `
+                        <div class="bag-header">
+                            <span>${bag.name}</span>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <span>₹${bagTotal}</span>
+                                <i class="far fa-trash-alt delete-bag" onclick="homeApp.deleteBag(${bagIndex})"></i>
+                            </div>
+                        </div>
+                        ${itemsHtml}
+                        <div class="service-options">
+                            <div class="service-opt ${bag.services.includes('iron') ? 'active' : ''}" onclick="homeApp.toggleService(${bagIndex},'iron')">Iron</div>
+                            <div class="service-opt ${bag.services.includes('wash') ? 'active' : ''}" onclick="homeApp.toggleService(${bagIndex},'wash')">Wash</div>
+                            <div class="service-opt ${bag.services.includes('dry') ? 'active' : ''}" onclick="homeApp.toggleService(${bagIndex},'dry')">Dry Clean</div>
+                        </div>`;
+                    container.appendChild(bagDiv);
+                });
+                this.updateBill();
+            },
+            toggleService(index, type) {
+                const bag = this.data.bags[index];
+                const idx = bag.services.indexOf(type);
+                if (idx > -1) bag.services.splice(idx, 1); else bag.services.push(type);
+                if (bag.services.length === 0) bag.services.push('wash');
+                this.renderCart();
+            },
+            deleteBag(index) {
+                this.data.bags.splice(index, 1);
+                this.renderCart();
+                this.updateCartBadge();
+            },
+            updateBill() {
+                let itemTotal = 0;
+                let count = 0;
+                this.data.bags.forEach(bag => bag.items.forEach(item => {
+                    let cost = 0;
+                    bag.services.forEach(s => cost += item.prices[s]);
+                    itemTotal += (cost * item.qty);
+                    count += item.qty;
+                }));
+                const threshold = 20;
+                const delivery = (count < threshold && count > 0) ? 40 : 0;
+                const remaining = threshold - count;
+                document.getElementById('bill-total-count').innerText = count;
+                document.getElementById('bill-item-total').innerText = '₹' + itemTotal;
+                document.getElementById('bill-delivery').innerText = delivery === 0 ? 'FREE' : '₹' + delivery;
+                const noteEl = document.getElementById('delivery-note');
+                if (count === 0) {
+                    noteEl.innerText = "* Add items to calculate delivery";
+                    noteEl.style.color = "var(--text-sub)";
+                } else if (remaining > 0) {
+                    noteEl.innerText = `* Add ${remaining} product${remaining > 1 ? 's' : ''} to get free delivery`;
+                    noteEl.style.color = "#e74c3c";
+                } else {
+                    noteEl.innerText = "* Free delivery applied! 🎉";
+                    noteEl.style.color = "#27ae60";
+                }
+                const grandTotal = itemTotal + delivery;
+                document.getElementById('bill-grand-total').innerText = '₹' + grandTotal;
+                return '₹' + grandTotal;
+            },
+            placeOrder() {
+                const user = auth.currentUser;
+                if (!user) {
+                    accountApp.showToast("Please login to place order");
+                    globalNav.switchView('landing');
+                    return;
+                }
+
+                // Vibrate phone on click
+                if (navigator.vibrate) navigator.vibrate(1000); // 1s haptic feedback
+
+                const btn = document.getElementById('main-pay-btn');
+                const total = this.updateBill();
+                const allItems = this.data.bags.flatMap(b => b.items);
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
+                btn.disabled = true;
+                setTimeout(() => {
+                    const user = auth.currentUser;
+                    const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+                    const newOrder = {
+                        id: orderId,
+                        date: new Date().toISOString(),
+                        status: 'Pick in 3 hr',
+                        bags: this.data.bags,
+                        items: allItems,
+                        total: total,
+                        userId: user ? user.uid : 'guest',
+                        userName: document.getElementById('display-name').innerText,
+                        userPhone: document.getElementById('display-phone').innerText,
+                        userLoc: document.getElementById('display-address').innerText
+                    };
+                    db.ref('orders/' + orderId).set(newOrder)
+                        .then(() => {
+                            document.getElementById('orderSuccessView').style.display = 'flex';
+                            this.data.bags = [];
+                            this.updateCartBadge();
+                            btn.innerHTML = 'Place Order';
+                            btn.disabled = false;
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            accountApp.showToast("Order Failed. Try again.");
+                            btn.disabled = false;
+                            btn.innerHTML = 'Place Order';
+                        });
+                }, 1500);
+            },
+            finishOrder() {
+                document.getElementById('orderSuccessView').style.display = 'none';
+                this.navTo('home');
+            }
+        };
+
+        // --- SWIPE GESTURE HANDLER ---
+        const swipeHandler = {
+            touchStartX: 0,
+            touchStartY: 0,
+            touchEndX: 0,
+            touchEndY: 0,
+            minSwipeDistance: 15, // Reduced to 15px for sensitive swipe (thora sa swipe)
+
+            init() {
+                const productList = document.getElementById('product-list');
+                if (!productList) return;
+
+                productList.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
+                productList.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
+                productList.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+            },
+
+            handleTouchStart(e) {
+                this.touchStartX = e.changedTouches[0].screenX;
+                this.touchStartY = e.changedTouches[0].screenY;
+            },
+
+            handleTouchMove(e) {
+                this.touchEndX = e.changedTouches[0].screenX;
+                this.touchEndY = e.changedTouches[0].screenY;
+            },
+
+            handleTouchEnd(e) {
+                const deltaX = this.touchEndX - this.touchStartX;
+                const deltaY = this.touchEndY - this.touchStartY;
+
+                // Check if it's more horizontal than vertical (to avoid interfering with scroll)
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > this.minSwipeDistance) {
+                    if (deltaX > 0) {
+                        // Swipe right
+                        this.handleSwipeRight();
+                    } else {
+                        // Swipe left
+                        this.handleSwipeLeft();
+                    }
+                }
+
+                // Reset
+                this.touchStartX = 0;
+                this.touchStartY = 0;
+                this.touchEndX = 0;
+                this.touchEndY = 0;
+            },
+
+            handleSwipeLeft() {
+                // Swipe left -> Go to Women
+                if (homeApp.data.activeTab === 'Men') {
+                    homeApp.switchTab('Women', 'left');
+                }
+            },
+
+            handleSwipeRight() {
+                // Swipe right -> Go to Men
+                if (homeApp.data.activeTab === 'Women') {
+                    homeApp.switchTab('Men', 'right');
+                }
+            }
+        };
+
+        // --- HISTORY MANAGER ---
+        const historyManager = {
+            init() {
+                // Set initial state if none exists
+                if (!history.state) {
+                    history.replaceState({ view: 'home', subView: 'home' }, '', '#home');
+                }
+
+                window.addEventListener('popstate', (event) => {
+                    const state = event.state;
+                    if (state) {
+                        this.restoreState(state);
+                    } else {
+                        // Fallback
+                        globalNav.switchView('home', false);
+                    }
+                });
+            },
+
+            restoreState(state) {
+                console.log("Restoring state:", state);
+                if (state.view === 'home') {
+                    globalNav.switchView('home', false);
+                    if (state.subView) {
+                        homeApp.navTo(state.subView, false);
+                    }
+                } else {
+                    globalNav.switchView(state.view, false);
+                }
+            }
+        };
+
+        // --- 3. INIT LOGIC ---
+        // Ensure DOM is ready before starting
+        document.addEventListener('DOMContentLoaded', () => {
+            themeApp.init(); // Initialize Theme
+            homeApp.init();
+            swipeHandler.init(); // Initialize swipe gestures
+            historyManager.init(); // Initialize back button support
+            if (typeof areaValidation !== 'undefined') areaValidation.init(); // Fetch areas for validation
+            landingApp.initGoogleOneTap();
+
+            // Splash Screen Logic
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.classList.add('hidden');
+                    // Remove from DOM after transition
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 2000);
+
+            if (typeof auth !== 'undefined') {
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        console.log("User detected:", user.uid);
+                        landingApp.checkDbAndRedirect(user);
+                        homeApp.fetchPinnedItems();
+                        // Update profile to show user is logged in
+                        accountApp.updateProfileVisibility(true);
+                    } else {
+                        console.log("No user signed in.");
+                        homeApp.data.pinnedMap = {};
+                        homeApp.renderProducts();
+                        // Update profile to show locked state
+                        accountApp.updateProfileVisibility(false);
+
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+
+</html>
