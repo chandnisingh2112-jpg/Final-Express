@@ -2633,6 +2633,9 @@
                             if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
                                 globalNav.loadUserData(userData);
                             }
+                            if (typeof accountApp !== 'undefined') {
+                                accountApp.updateProfileVisibility(true);
+                            }
                             document.getElementById('view-landing')?.classList.remove('active');
                             document.getElementById('view-login')?.classList.remove('active');
                             document.getElementById('view-home')?.classList.add('active');
@@ -3136,6 +3139,7 @@
                         localStorage.setItem('laundryUser', JSON.stringify(userData));
                         globalNav.loadUserData(userData);
                         globalNav.switchView('home');
+                        if (typeof accountApp !== 'undefined') accountApp.updateProfileVisibility(true);
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     } else {
                         document.getElementById('view-landing').classList.remove('active');
@@ -3147,21 +3151,31 @@
                 });
             },
             handleGoogleAuth: () => {
-                // Clear any previous cancel/skip state and force popup to show
+                // Force re-initialization and prompt to bypass cooldown
                 if (typeof google !== 'undefined' && google.accounts) {
-                    // Cancel previous state (if user clicked X before)
-                    google.accounts.id.cancel();
+                    // Re-initialize to ensure fresh state
+                    google.accounts.id.initialize({
+                        client_id: '438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com',
+                        callback: handleGoogleSignIn,
+                        auto_select: false,
+                        cancel_on_tap_outside: true
+                    });
 
-                    // Small delay then show prompt again
+                    // Show prompt with a slight delay
                     setTimeout(() => {
                         google.accounts.id.prompt((notification) => {
                             if (notification.isNotDisplayed()) {
-                                console.log('⚠️ One Tap not displayed:', notification.getNotDisplayedReason());
-                                // If still not showing, it might be due to browser restrictions
-                                accountApp.showToast("Please enable popups for this site");
+                                console.log('⚠️ One Tap reason:', notification.getNotDisplayedReason());
+                                if (notification.getNotDisplayedReason() === 'suppressed_by_user') {
+                                    // If suppressed, we can try to reset
+                                    document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+                                    google.accounts.id.prompt();
+                                } else {
+                                    accountApp.showToast("Please check popup blocker");
+                                }
                             }
                         });
-                    }, 100);
+                    }, 50);
                 } else {
                     accountApp.showToast("Google Sign-In not loaded yet");
                 }
@@ -3212,6 +3226,7 @@
                         document.getElementById('view-login').classList.remove('active');
                         document.getElementById('view-home').classList.add('active');
                         globalNav.loadUserData(userData);
+                        if (typeof accountApp !== 'undefined') accountApp.updateProfileVisibility(true);
                         accountApp.showToast("Welcome!");
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     })
