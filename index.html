@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <!-- Google One Tap Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 
@@ -244,6 +245,17 @@
             overflow: hidden;
         }
 
+        #view-login.view-section {
+            padding-bottom: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 2000;
+            background: var(--bg-body);
+        }
+
         .view-section.active {
             display: block;
         }
@@ -352,6 +364,9 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            overflow-y: auto;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
 
         .login-card {
@@ -1655,7 +1670,6 @@
         }
 
 
-
         .area-suggestion-item.no-results {
             cursor: default;
             color: var(--text-sub);
@@ -1708,6 +1722,8 @@
             navigation: auto;
         }
 
+
+
         /* Splash Screen */
         #splash-screen {
             position: fixed;
@@ -1757,14 +1773,14 @@
 
 <body data-theme="light">
 
+    <!-- Google Sign-In (Popup mode - no auto prompt) -->
+
     <!-- Splash Screen -->
     <div id="splash-screen">
         <div class="splash-content">
             <img src="logo.png" alt="Logo" class="splash-logo">
         </div>
     </div>
-
-
 
     <div id="view-landing" class="view-section">
         <div class="landing-container">
@@ -2186,6 +2202,30 @@
                 </div>
 
 
+                <div class="st-row" onclick="detailsApp.open()">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:rgba(251, 191, 36, 0.1); color:#F59E0B"><i
+                                class="fas fa-file-invoice"></i></div>
+                        <div class="st-info">
+                            <h4 style="font-size:14px; font-weight:600;">Details</h4>
+                            <p style="font-size:11px; color:var(--text-sub);">View rates & services</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sub); font-size:12px;"></i>
+                </div>
+
+                <div class="st-row" onclick="supportChat.open()">
+                    <div class="st-left" style="display:flex; gap:15px; align-items:center;">
+                        <div class="st-icon-bg" style="background:rgba(6, 182, 212, 0.1); color:#06B6D4"><i
+                                class="fas fa-headset"></i></div>
+                        <div class="st-info">
+                            <h4 style="font-size:14px; font-weight:600;">Help</h4>
+                            <p style="font-size:11px; color:var(--text-sub);">Support & Chat</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sub); font-size:12px;"></i>
+                </div>
+
 
                 <div class="st-row" onclick="landingApp.confirmLogout()" style="cursor:pointer">
                     <div class="st-left" style="display:flex; gap:15px; align-items:center;">
@@ -2199,6 +2239,84 @@
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <!-- Details View -->
+    <div id="view-details" class="view-section">
+        <div class="header">
+            <button class="back-btn" onclick="globalNav.switchView('account')"
+                style="border:none; background:none; font-size:18px; color:var(--text-main); margin-right:10px;"><i
+                    class="fas fa-arrow-left"></i></button>
+            <h2 style="color:var(--text-main); font-size: 16px;">Details & Rates</h2>
+            <div style="width: 24px;"></div>
+        </div>
+
+        <div class="tabs" style="padding: 15px 20px; gap: 12px;">
+            <div class="tab active" id="tab-areas" onclick="detailsApp.switchTab('areas')" style="flex: 1;">Areas</div>
+            <div class="tab" id="tab-prices" onclick="detailsApp.switchTab('prices')" style="flex: 1;">Prices</div>
+        </div>
+
+        <div id="details-areas-content" class="app-container">
+            <div class="glass-panel" style="padding: 20px; margin-bottom: 15px;">
+                <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 15px; color: var(--text-main);">Service
+                    Available Areas</h3>
+                <div id="areas-list"></div>
+            </div>
+        </div>
+
+        <div id="details-prices-content" class="app-container hidden">
+            <div class="glass-panel" style="padding: 20px; margin-bottom: 15px;">
+                <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 15px; color: var(--text-main);">Pricing
+                </h3>
+                <div
+                    style="margin-bottom: 20px; background: var(--bg-panel); padding: 12px; border-radius: 12px; display: flex; justify-content: space-around; font-size: 11px; font-weight: 700; color: var(--text-sub);">
+                    <div style="width:40%;">ITEM</div>
+                    <div style="width:20%; text-align:center;">IRON</div>
+                    <div style="width:20%; text-align:center;">WASH</div>
+                    <div style="width:20%; text-align:center;">DRY</div>
+                </div>
+                <div id="prices-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help/Support Chat View -->
+    <div id="view-help" class="view-section">
+        <div class="header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 5px;">
+            <div style="display: flex; width: 100%; align-items: center; justify-content: space-between;">
+                <button class="back-btn" onclick="globalNav.switchView('account')"
+                    style="border:none; background:none; font-size:18px; color:var(--text-main);"><i
+                        class="fas fa-arrow-left"></i></button>
+                <h2 style="color:var(--text-main); font-size: 16px; margin: 0;">Support Chat</h2>
+                <div style="width: 24px;"></div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; align-self: center; margin-top: -5px;">
+                <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+                <span style="font-size: 12px; color: var(--text-sub);">Online</span>
+            </div>
+        </div>
+
+        <div class="app-container" style="flex: 1; overflow-y: auto; padding-bottom: 80px;">
+            <div id="chat-messages" style="display: flex; flex-direction: column; gap: 15px; padding: 20px 0;">
+                <div style="display: flex; justify-content: flex-start;">
+                    <div
+                        style="background: white; padding: 15px 18px; border-radius: 18px 18px 18px 4px; max-width: 75%; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <p style="margin: 0; font-size: 13px; color: var(--text-main); line-height: 1.5;">Hi! 👋 Welcome
+                            to Laundry Express. How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            style="position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-body); padding: 15px 20px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="chat-input" placeholder="Type a message..."
+                style="flex: 1; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 25px; background: var(--bg-panel); color: var(--text-main); font-size: 14px;">
+            <button onclick="supportChat.sendMessage()"
+                style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary-action); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 
@@ -2439,7 +2557,6 @@
         // Laundry Express App - Main JavaScript Logic
 
         // --- 1. CONFIGURATION & SETUP ---
-
         const firebaseConfig = {
             apiKey: "AIzaSyCCvfFJQNRhryu8v-ItgHWVGORxeI8jxNk",
             authDomain: "final-express-trio.firebaseapp.com",
@@ -2456,14 +2573,144 @@
         try {
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
-                var auth = firebase.auth();
                 var db = firebase.database();
-                var provider = new firebase.auth.GoogleAuthProvider();
             } else {
                 console.error("Firebase SDK not loaded");
                 alert("Error loading app resources. Please check internet connection.");
             }
         } catch (e) { console.error(e); }
+
+        // Google One Tap Authentication
+        var currentUser = null; // Store current user info
+
+        function handleGoogleSignIn(response) {
+            // Decode JWT token to get user info
+            const payload = parseJwt(response.credential);
+
+            currentUser = {
+                uid: payload.sub,
+                email: payload.email,
+                name: payload.name,
+                picture: payload.picture,
+                email_verified: payload.email_verified
+            };
+
+            console.log('✅ User signed in:', currentUser.name);
+
+            // Save user to Firebase Database
+            if (db) {
+                const userRef = db.ref('users/' + currentUser.uid);
+                userRef.once('value').then(snapshot => {
+                    localStorage.setItem('googleUser', JSON.stringify(currentUser));
+
+                    if (!snapshot.exists()) {
+                        // New user - show registration form
+                        console.log('🆕 New user - showing registration form');
+                        setTimeout(() => {
+                            const nameInput = document.getElementById('fullName');
+                            if (nameInput) nameInput.value = currentUser.name;
+                        }, 100);
+                        document.getElementById('view-landing')?.classList.remove('active');
+                        document.getElementById('view-login')?.classList.add('active');
+                    } else {
+                        // Existing user - check if profile is complete  
+                        const userData = snapshot.val();
+                        if (!userData.phone || !userData.address) {
+                            // Incomplete profile
+                            console.log('⚠️  Incomplete profile - showing form');
+                            setTimeout(() => {
+                                if (userData.name) document.getElementById('fullName').value = userData.name;
+                                if (userData.phone) document.getElementById('whatsapp').value = userData.phone;
+                                if (userData.address) document.getElementById('areaSearch').value = userData.address;
+                                if (userData.landmark) document.getElementById('landmark').value = userData.landmark;
+                            }, 100);
+                            document.getElementById('view-landing')?.classList.remove('active');
+                            document.getElementById('view-login')?.classList.add('active');
+                        } else {
+                            // Complete profile - go to home
+                            console.log('✅ Profile complete');
+                            localStorage.setItem('laundryUser', JSON.stringify(userData));
+                            if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
+                                globalNav.loadUserData(userData);
+                            }
+                            document.getElementById('view-landing')?.classList.remove('active');
+                            document.getElementById('view-login')?.classList.remove('active');
+                            document.getElementById('view-home')?.classList.add('active');
+                            if (typeof ordersApp !== 'undefined') ordersApp.init();
+                        }
+                    }
+                }).catch(error => {
+                    console.error('❌ Database error:', error);
+                });
+                return; // Don't execute code below - everything handled in callback
+            }
+
+            // Store in localStorage
+            localStorage.setItem('googleUser', JSON.stringify(currentUser));
+
+            // Trigger UI update
+            if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
+                globalNav.loadUserData({
+                    email: currentUser.email,
+                    name: currentUser.name
+                });
+            }
+
+            // Hide One Tap prompt
+            document.getElementById('g_id_onload')?.remove();
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        function signOutUser() {
+            currentUser = null;
+            localStorage.removeItem('googleUser');
+            google.accounts.id.disableAutoSelect();
+            console.log('👋 User signed out');
+            // Reload page or redirect to login
+            location.reload();
+        }
+
+        // Initialize Google One Tap on page load
+        window.addEventListener('load', () => {
+            // Check if user is already logged in
+            const storedUser = localStorage.getItem('googleUser');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
+                    globalNav.loadUserData({
+                        email: currentUser.email,
+                        name: currentUser.name
+                    });
+                }
+            }
+
+            // Initialize Google One Tap
+            if (typeof google !== 'undefined' && google.accounts) {
+                google.accounts.id.initialize({
+                    client_id: '438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com',
+                    callback: handleGoogleSignIn,
+                    auto_select: false,  // Disabled - only show on button click
+                    cancel_on_tap_outside: true
+                });
+
+                // Show One Tap prompt if not logged in
+                if (!currentUser) {
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            console.log('One Tap not displayed:', notification.getNotDisplayedReason());
+                        }
+                    });
+                }
+            }
+        });
 
         // --- 2. APP MODULES ---
 
@@ -2501,8 +2748,8 @@
             closeModal(id) { document.getElementById(id).style.display = 'none'; },
             saveData() {
                 this.closeModal('confirmModal');
-                const currentUser = auth.currentUser;
-                if (currentUser) {
+                // Use Google One Tap currentUser instead of Firebase auth
+                if (currentUser && currentUser.uid) {
                     const userData = landingApp.checkExistingUser() || {};
                     userData.name = document.getElementById('inpName').value;
                     userData.phone = document.getElementById('inpPhone').value;
@@ -2899,68 +3146,30 @@
                     accountApp.showToast("Error connecting to database.");
                 });
             },
-            initGoogleOneTap: () => {
-                console.log("Initializing Google One Tap...");
-                if (typeof google === 'undefined') {
-                    console.warn("Google Identity Services script not loaded yet. Retrying...");
-                    setTimeout(landingApp.initGoogleOneTap, 500);
-                    return;
-                }
-                console.log("Google script found. Setting up client...");
-                try {
-                    google.accounts.id.initialize({
-                        client_id: "438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com",
-                        callback: landingApp.handleCredentialResponse,
-                        auto_select: true,
-                        cancel_on_tap_outside: false
-                    });
-                    console.log("Client initialized. Requesting prompt...");
-                    google.accounts.id.prompt((notification) => {
-                        console.log("Prompt notification received:", notification);
-                        if (notification.isNotDisplayed()) {
-                            console.error("One Tap NOT displayed. Reason:", notification.getNotDisplayedReason());
-                        } else if (notification.isSkippedMoment()) {
-                            console.warn("One Tap skipped. Reason:", notification.getSkippedReason());
-                        } else {
-                            console.log("One Tap displayed successfully.");
-                        }
-                    });
-                } catch (e) {
-                    console.error("Error during One Tap initialization:", e);
-                }
-            },
-            handleCredentialResponse: (response) => {
-                console.log("Credential response received from Google:", response);
-                if (!response.credential) {
-                    console.error("No credential token received!");
-                    return;
-                }
-                console.log("Creating Firebase credential...");
-                const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
-                console.log("Signing into Firebase...");
-                auth.signInWithCredential(credential)
-                    .then((result) => {
-                        console.log("Firebase Sign-In Successful:", result);
-                        accountApp.showToast("Logged in successfully!");
-                    })
-                    .catch((error) => {
-                        console.error("Firebase Auth Error:", error);
-                        console.error("Error Code:", error.code);
-                        console.error("Error Message:", error.message);
-                        accountApp.showToast("Login Failed: " + error.message);
-                    });
-            },
             handleGoogleAuth: () => {
-                // Trigger the Google One Tap prompt manually if the button is clicked
-                google.accounts.id.prompt();
+                // Clear any previous cancel/skip state and force popup to show
+                if (typeof google !== 'undefined' && google.accounts) {
+                    // Cancel previous state (if user clicked X before)
+                    google.accounts.id.cancel();
+
+                    // Small delay then show prompt again
+                    setTimeout(() => {
+                        google.accounts.id.prompt((notification) => {
+                            if (notification.isNotDisplayed()) {
+                                console.log('⚠️ One Tap not displayed:', notification.getNotDisplayedReason());
+                                // If still not showing, it might be due to browser restrictions
+                                accountApp.showToast("Please enable popups for this site");
+                            }
+                        });
+                    }, 100);
+                } else {
+                    accountApp.showToast("Google Sign-In not loaded yet");
+                }
             },
             confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
             performLogout: () => {
-                auth.signOut().then(() => {
-                    localStorage.removeItem('laundryUser');
-                    if (typeof google !== 'undefined') google.accounts.id.disableAutoSelect();
-                    location.reload();
-                }).catch((error) => { console.error("Sign Out Error", error); });
+                // Use Google One Tap sign out
+                signOutUser();
             }
         };
 
@@ -2981,8 +3190,11 @@
                 document.getElementById('home-address-display').innerText = shortAddr;
             },
             goToApp: () => {
-                const currentUser = auth.currentUser;
-                if (!currentUser) { accountApp.showToast("Authentication Error. Please restart."); return; }
+                // Use Google One Tap currentUser instead of Firebase auth
+                if (!currentUser || !currentUser.uid) {
+                    accountApp.showToast("Authentication Error. Please sign in.");
+                    return;
+                }
                 const userData = {
                     uid: currentUser.uid,
                     name: document.getElementById('fullName').value,
@@ -3301,8 +3513,12 @@
                 document.getElementById('step2').classList.add('active');
                 document.getElementById('step2Indicator').classList.add('active');
                 document.getElementById('progressFill').style.width = "100%";
-                // Initialize area validation when entering step 2
+                // ⚡ Lazy load areas when entering step 2
                 if (typeof areaValidation !== 'undefined') {
+                    // Initialize areas if not already loaded
+                    if (!areaValidation.availableAreas || areaValidation.availableAreas.length === 0) {
+                        areaValidation.init();
+                    }
                     areaValidation.attach('areaSearch', 'areaSuggestions', 'areaError');
                 }
             },
@@ -3354,19 +3570,48 @@
                 const productsRef = db.ref('products');
                 productsRef.on('value', (snapshot) => {
                     const val = snapshot.val();
+
                     if (!val) {
-                        console.log("No products found in DB");
+                        console.log("❌ No products found in DB");
                         this.data.products = [];
-                    } else if (Array.isArray(val)) {
-                        this.data.products = val;
-                    } else {
-                        // Handle object with numeric keys or random keys
-                        this.data.products = Object.values(val);
+                        accountApp.showToast("No products available");
+                        return;
                     }
-                    console.log("Loaded products:", this.data.products);
+
+                    // Convert Firebase data to array with guaranteed IDs
+                    this.data.products = [];
+
+                    if (Array.isArray(val)) {
+                        // If it's an array, ensure each item has an ID
+                        val.forEach((product, index) => {
+                            if (product) {
+                                // Use product.id if exists, otherwise use index
+                                product.id = product.id || index;
+                                this.data.products.push(product);
+                            }
+                        });
+                    } else {
+                        // If it's an object, use the key as ID
+                        Object.keys(val).forEach(key => {
+                            const product = val[key];
+                            if (product && typeof product === 'object') {
+                                // Ensure ID exists - use Firebase key if product.id is missing
+                                product.id = product.id || key;
+                                this.data.products.push(product);
+                            }
+                        });
+                    }
+
+                    // Debug: Log all product IDs
+                    console.log("📦 Loaded products:", this.data.products.length);
+                    this.data.products.forEach(p => {
+                        console.log(`  → ${p.name}: ID = '${p.id}' (type: ${typeof p.id})`);
+                    });
+
                     this.renderProducts();
                 }, (error) => {
-                    console.error("Error loading products:", error);
+                    console.error("❌ Error loading products:", error);
+                    accountApp.showToast("Failed to load products");
                 });
             },
             navTo(screen, addHistory = true) {
@@ -3499,7 +3744,14 @@
                 const unpinned = visibleProducts.filter(p => !pinnedMap[p.id]);
 
                 const createCard = (p, isPinned) => {
-                    const currentQty = this.data.tempSelection[p.id] || 0;
+                    // Ensure product has an ID
+                    if (!p.id) {
+                        console.error('❌ Product missing ID:', p);
+                        p.id = Math.random().toString(36).substr(2, 9); // Generate random ID
+                    }
+
+                    const productId = String(p.id);
+                    const currentQty = this.data.tempSelection[productId] || 0;
                     const card = document.createElement('div');
                     card.className = `product-card ${isPinned ? 'pinned' : ''}`;
 
@@ -3526,12 +3778,12 @@
                                 <img src="${p.img}" class="prod-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                                 <i class="fas ${p.icon} prod-img-fallback"></i>
                             </div>
-                            <div class="prod-details"><h3>${p.name}</h3><p>Premium Care</p></div>
+                            <div class="prod-details"><h3>${p.name}</h3><p>${p.description || 'Premium Care'}</p></div>
                         </div>
                         <div class="counter">
-                            <div class="btn-count" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp(${p.id}, -1)">−</div>
+                            <div class="btn-count" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp('${p.id}', -1)">−</div>
                             <span class="count-val">${currentQty}</span>
-                            <div class="btn-count active" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp(${p.id}, 1)">+</div>
+                            <div class="btn-count active" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="homeApp.updateTemp('${p.id}', 1)">+</div>
                         </div>`;
                     return card;
                 };
@@ -3552,10 +3804,24 @@
                 this.updateFloatingBar();
             },
             updateTemp(id, change) {
+                // Convert to string for consistency
+                const productId = String(id);
+
+                console.log(`🔄 updateTemp called: ID='${productId}', change=${change}`);
+
                 if (navigator.vibrate) navigator.vibrate(20);
-                if (!this.data.tempSelection[id]) this.data.tempSelection[id] = 0;
-                this.data.tempSelection[id] += change;
-                if (this.data.tempSelection[id] <= 0) delete this.data.tempSelection[id];
+
+                if (!this.data.tempSelection[productId]) {
+                    this.data.tempSelection[productId] = 0;
+                }
+
+                this.data.tempSelection[productId] += change;
+
+                if (this.data.tempSelection[productId] <= 0) {
+                    delete this.data.tempSelection[productId];
+                }
+
+                console.log('📊 Current selection:', this.data.tempSelection);
                 this.renderProducts();
             },
             updateFloatingBar() {
@@ -3674,8 +3940,8 @@
                 return '₹' + grandTotal;
             },
             placeOrder() {
-                const user = auth.currentUser;
-                if (!user) {
+                // Check if user is logged in (Google One Tap)
+                if (!currentUser || !currentUser.uid) {
                     accountApp.showToast("Please login to place order");
                     globalNav.switchView('landing');
                     return;
@@ -3690,16 +3956,23 @@
                 btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
                 btn.disabled = true;
                 setTimeout(() => {
-                    const user = auth.currentUser;
                     const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+
+                    // Add service type to each bag
+                    const services = ['iron', 'wash', 'dry'];
+                    const bagsWithService = this.data.bags.map((bag, index) => ({
+                        ...bag,
+                        service: services[index % 3] || 'iron' // Cycle through iron, wash, dry
+                    }));
+
                     const newOrder = {
                         id: orderId,
                         date: new Date().toISOString(),
                         status: 'Pick in 3 hr',
-                        bags: this.data.bags,
+                        bags: bagsWithService,
                         items: allItems,
                         total: total,
-                        userId: user ? user.uid : 'guest',
+                        userId: currentUser ? currentUser.uid : 'guest',
                         userName: document.getElementById('display-name').innerText,
                         userPhone: document.getElementById('display-phone').innerText,
                         userLoc: document.getElementById('display-address').innerText
@@ -3822,6 +4095,237 @@
             }
         };
 
+
+        // Details App Logic
+        const detailsApp = {
+            currentTab: 'areas',
+
+            open() {
+                globalNav.switchView('details');
+                this.loadAreas();
+                this.loadPrices();
+            },
+
+            switchTab(tab) {
+                this.currentTab = tab;
+                document.querySelectorAll('#view-details .tab').forEach(t => t.classList.remove('active'));
+                if (tab === 'areas') {
+                    document.getElementById('tab-areas').classList.add('active');
+                    document.getElementById('details-areas-content').classList.remove('hidden');
+                    document.getElementById('details-prices-content').classList.add('hidden');
+                } else {
+                    document.getElementById('tab-prices').classList.add('active');
+                    document.getElementById('details-prices-content').classList.remove('hidden');
+                    document.getElementById('details-areas-content').classList.add('hidden');
+                }
+            },
+
+            loadAreas() {
+                const areasList = document.getElementById('areas-list');
+
+                // ⚡ Lazy load: Initialize areas if not already loaded
+                if (typeof areaValidation !== 'undefined' && (!areaValidation.availableAreas || areaValidation.availableAreas.length === 0)) {
+                    areasList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px;">Loading areas...</p>';
+                    areaValidation.init();
+                    // Wait a bit for areas to load, then render
+                    setTimeout(() => this.renderAreas(), 500);
+                    return;
+                }
+
+                this.renderAreas();
+            },
+
+            renderAreas() {
+                const areasList = document.getElementById('areas-list');
+                if (typeof areaValidation !== 'undefined' && areaValidation.availableAreas && areaValidation.availableAreas.length > 0) {
+                    areasList.innerHTML = areaValidation.availableAreas.map(area => `
+                        <div style="padding: 16px 20px; background: white; border-radius: 12px; margin-bottom: 8px; font-weight: 600; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                            ${area}
+                        </div>
+                    `).join('');
+                } else if (typeof db !== 'undefined') {
+                    db.ref('serviceAreas').once('value').then(snapshot => {
+                        const areas = snapshot.val();
+                        if (areas && Array.isArray(areas) && areas.length > 0) {
+                            areasList.innerHTML = areas.map(area => `
+                                <div style="padding: 16px 20px; background: white; border-radius: 12px; margin-bottom: 8px; font-weight: 600; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+                                    ${area}
+                                </div>
+                            `).join('');
+                        } else {
+                            areasList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px;">No service areas available</p>';
+                        }
+                    });
+                } else {
+                    areasList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px;">Loading areas...</p>';
+                }
+            },
+
+            loadPrices() {
+                const pricesList = document.getElementById('prices-list');
+                if (typeof homeApp !== 'undefined' && homeApp.data.products && homeApp.data.products.length > 0) {
+                    pricesList.innerHTML = homeApp.data.products.map(product => {
+                        const prices = product.prices || { iron: '-', wash: '-', dry: '-' };
+                        return `
+                            <div style="display: flex; justify-content: space-around; align-items: center; padding: 12px; background: var(--bg-card); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border-color);">
+                                <div style="width:40%; font-weight: 600; color: var(--text-main); font-size: 13px;">${product.name}</div>
+                                <div style="width:20%; text-align:center; color: #F59E0B; font-weight: 600; font-size: 12px;">₹${prices.iron || '-'}</div>
+                                <div style="width:20%; text-align:center; color: #10B981; font-weight: 600; font-size: 12px;">₹${prices.wash || '-'}</div>
+                                <div style="width:20%; text-align:center; color: #8B5CF6; font-weight: 600; font-size: 12px;">₹${prices.dry || '-'}</div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    pricesList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px;">Loading prices...</p>';
+                }
+            }
+        };
+
+        // Support Chat Logic
+        const supportChat = {
+            chatId: null,
+            userId: null,
+            messagesListener: null,
+
+            open() {
+                globalNav.switchView('help');
+                this.initChat();
+            },
+
+            initChat() {
+                const user = auth.currentUser;
+                if (!user) {
+                    console.error('❌ No user logged in');
+                    accountApp.showToast('Please login to use support chat');
+                    return;
+                }
+
+                this.userId = user.uid;
+                this.chatId = this.userId;
+                console.log('💬 Initializing chat:', this.userId);
+
+                const chatContainer = document.getElementById('chat-messages');
+                chatContainer.innerHTML = `
+                    <div style="display: flex; justify-content: flex-start;">
+                        <div style="background: white; padding: 15px 18px; border-radius: 18px 18px 18px 4px; max-width: 75%; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                            <p style="margin: 0; font-size: 13px; color: var(--text-main); line-height: 1.5;">Hi! 👋 Welcome to Laundry Express. How can I help you today?</p>
+                        </div>
+                    </div>
+                `;
+
+                this.loadMessages();
+                this.listenForMessages();
+            },
+
+            loadMessages() {
+                db.ref(`supportChats/${this.chatId}/messages`).once('value').then(snapshot => {
+                    const messages = snapshot.val();
+                    if (messages) {
+                        Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
+                            this.addMessageToUI(msg, false);
+                        });
+                        this.scrollToBottom();
+                    }
+                }).catch(err => console.error('❌ Error:', err));
+            },
+
+            listenForMessages() {
+                if (this.messagesListener) {
+                    db.ref(`supportChats/${this.chatId}/messages`).off('child_added', this.messagesListener);
+                }
+
+                this.messagesListener = db.ref(`supportChats/${this.chatId}/messages`).on('child_added', snapshot => {
+                    const msg = snapshot.val();
+                    if (msg.sender === 'admin') {
+                        this.addMessageToUI(msg, true);
+                        this.scrollToBottom();
+                    }
+                });
+            },
+
+            sendMessage() {
+                const input = document.getElementById('chat-input');
+                const message = input.value.trim();
+                if (message === '') return;
+
+                const user = auth.currentUser;
+                if (!user) {
+                    accountApp.showToast('Please login to send messages');
+                    return;
+                }
+
+                // Show user message immediately in UI
+                const chatMessages = document.getElementById('chat-messages');
+                const userMsg = document.createElement('div');
+                userMsg.style.cssText = 'display: flex; justify-content: flex-end;';
+                userMsg.innerHTML = `
+                    <div style="background: var(--primary-action); padding: 12px 16px; border-radius: 18px 18px 4px 18px; max-width: 70%;">
+                        <p style="margin: 0; font-size: 13px; color: white;">${message}</p>
+                    </div>
+                `;
+                chatMessages.appendChild(userMsg);
+                input.value = '';
+                this.scrollToBottom();
+
+                // Save to Firebase
+                const messageData = {
+                    sender: 'user',
+                    senderName: user.displayName || 'User',
+                    message: message,
+                    timestamp: Date.now()
+                };
+
+                // Save message to chat
+                db.ref(`supportChats/${this.chatId}/messages`).push(messageData).then(() => {
+                    console.log('✅ Message saved to database');
+
+                    // Update chat metadata
+                    db.ref(`supportChats/${this.chatId}`).update({
+                        userId: user.uid,
+                        userName: user.displayName || 'User',
+                        userPhone: user.phoneNumber || 'No phone',
+                        lastMessage: message,
+                        lastMessageTime: Date.now(),
+                        status: 'active',
+                        updatedAt: Date.now()
+                    }).catch(err => console.error('❌ Error updating chat metadata:', err));
+
+                }).catch(err => {
+                    console.error('❌ Error saving message:', err);
+                    accountApp.showToast('Failed to send message');
+                });
+            },
+
+            addMessageToUI(msg, isNew) {
+                const chatMessages = document.getElementById('chat-messages');
+                const messageDiv = document.createElement('div');
+
+                const isAdmin = msg.sender === 'admin';
+                const align = isAdmin ? 'flex-start' : 'flex-end';
+                const bgColor = isAdmin ? 'white' : 'var(--primary-action)';
+                const textColor = isAdmin ? 'var(--text-main)' : 'white';
+                const borderRadius = isAdmin ? '18px 18px 18px 4px' : '18px 18px 4px 18px';
+
+                messageDiv.style.cssText = `display: flex; justify-content: ${align};`;
+                messageDiv.innerHTML = `
+                    <div style="background: ${bgColor}; padding: 15px 18px; border-radius: ${borderRadius}; max-width: 75%; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <p style="margin: 0; font-size: 13px; color: ${textColor}; line-height: 1.5;">${msg.message}</p>
+                    </div>
+                `;
+
+                chatMessages.appendChild(messageDiv);
+            },
+
+            scrollToBottom() {
+                const chatMessages = document.getElementById('chat-messages');
+                if (chatMessages && chatMessages.parentElement) {
+                    setTimeout(() => {
+                        chatMessages.parentElement.scrollTop = chatMessages.parentElement.scrollHeight;
+                    }, 100);
+                }
+            }
+        };
+
         // --- 3. INIT LOGIC ---
         // Ensure DOM is ready before starting
         document.addEventListener('DOMContentLoaded', () => {
@@ -3829,38 +4333,47 @@
             homeApp.init();
             swipeHandler.init(); // Initialize swipe gestures
             historyManager.init(); // Initialize back button support
-            if (typeof areaValidation !== 'undefined') areaValidation.init(); // Fetch areas for validation
-            landingApp.initGoogleOneTap();
+            // ⚡ Optimization: Load areas only when needed (lazy loading)
+            // if (typeof areaValidation !== 'undefined') areaValidation.init();
 
-            // Splash Screen Logic
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                if (splash) {
-                    splash.classList.add('hidden');
-                    // Remove from DOM after transition
-                    setTimeout(() => splash.remove(), 500);
-                }
-            }, 2000);
 
-            if (typeof auth !== 'undefined') {
-                auth.onAuthStateChanged((user) => {
-                    if (user) {
-                        console.log("User detected:", user.uid);
-                        landingApp.checkDbAndRedirect(user);
-                        homeApp.fetchPinnedItems();
-                        // Update profile to show user is logged in
-                        accountApp.updateProfileVisibility(true);
+            // Check authentication status on page load
+            function checkAuthStatus() {
+                if (currentUser && currentUser.uid) {
+                    console.log("✅ User detected:", currentUser.uid);
+                    const storedUserData = localStorage.getItem('laundryUser');
+                    if (storedUserData) {
+                        const userData = JSON.parse(storedUserData);
+                        globalNav.loadUserData(userData);
+                        globalNav.switchView('home');
+                        if (typeof ordersApp !== 'undefined') ordersApp.init();
                     } else {
-                        console.log("No user signed in.");
-                        homeApp.data.pinnedMap = {};
-                        homeApp.renderProducts();
-                        // Update profile to show locked state
-                        accountApp.updateProfileVisibility(false);
-
+                        // User logged in but no profile data - check database
+                        landingApp.checkDbAndRedirect(currentUser);
                     }
-                });
+                    homeApp.fetchPinnedItems();
+                    accountApp.updateProfileVisibility(true);
+                } else {
+                    console.log("❌ No user signed in");
+                    homeApp.data.pinnedMap = {};
+                    homeApp.renderProducts();
+                    accountApp.updateProfileVisibility(false);
+                }
             }
+
+            // Call check on page load
+            checkAuthStatus();
         });
+
+        // Splash Screen Logic
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.classList.add('hidden');
+                // Remove from DOM after transition
+                setTimeout(() => splash.remove(), 500);
+            }
+        }, 2000);
 
     </script>
 </body>
