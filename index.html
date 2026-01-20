@@ -11,9 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- Google One Tap Sign-In -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 
     <style>
@@ -2639,13 +2638,13 @@
 
         // --- 1. CONFIGURATION & SETUP ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCCvfFJQNRhryu8v-ItgHWVGORxeI8jxNk",
-            authDomain: "final-express-trio.firebaseapp.com",
-            databaseURL: "https://final-express-trio-default-rtdb.firebaseio.com",
-            projectId: "final-express-trio",
-            storageBucket: "final-express-trio.firebasestorage.app",
-            messagingSenderId: "438360888346",
-            appId: "1:438360888346:web:2b8cd66cbaab4d09292da3"
+            apiKey: "AIzaSyD_whg2YD3iBAYfxpqZwYpdURrg8eyPgwg",
+            authDomain: "business-project-910f2.firebaseapp.com",
+            databaseURL: "https://business-project-910f2-default-rtdb.firebaseio.com",
+            projectId: "business-project-910f2",
+            storageBucket: "business-project-910f2.firebasestorage.app",
+            messagingSenderId: "52172689456",
+            appId: "1:52172689456:web:92eaf5189d9288b2c85df5"
         };
 
 
@@ -2654,146 +2653,14 @@
         try {
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
+                var auth = firebase.auth();
                 var db = firebase.database();
+                var provider = new firebase.auth.GoogleAuthProvider();
             } else {
                 console.error("Firebase SDK not loaded");
                 alert("Error loading app resources. Please check internet connection.");
             }
         } catch (e) { console.error(e); }
-
-        // Google One Tap Authentication
-        var currentUser = null; // Store current user info
-
-        function handleGoogleSignIn(response) {
-            // Decode JWT token to get user info
-            const payload = parseJwt(response.credential);
-
-            currentUser = {
-                uid: payload.sub,
-                email: payload.email,
-                name: payload.name,
-                picture: payload.picture,
-                email_verified: payload.email_verified
-            };
-
-            console.log('✅ User signed in:', currentUser.name);
-
-            // Save user to Firebase Database
-            if (db) {
-                const userRef = db.ref('users/' + currentUser.uid);
-                userRef.once('value').then(snapshot => {
-                    localStorage.setItem('googleUser', JSON.stringify(currentUser));
-
-                    if (!snapshot.exists()) {
-                        // New user - show registration form
-                        console.log('🆕 New user - showing registration form');
-                        setTimeout(() => {
-                            const nameInput = document.getElementById('fullName');
-                            if (nameInput) nameInput.value = currentUser.name;
-                        }, 100);
-                        document.getElementById('view-landing')?.classList.remove('active');
-                        document.getElementById('view-login')?.classList.add('active');
-                    } else {
-                        // Existing user - check if profile is complete  
-                        const userData = snapshot.val();
-                        if (!userData.phone || !userData.address) {
-                            // Incomplete profile
-                            console.log('⚠️ Incomplete profile - showing form');
-                            setTimeout(() => {
-                                if (userData.name) document.getElementById('fullName').value = userData.name;
-                                if (userData.phone) document.getElementById('whatsapp').value = userData.phone;
-                                if (userData.address) document.getElementById('areaSearch').value = userData.address;
-                                if (userData.landmark) document.getElementById('landmark').value = userData.landmark;
-                            }, 100);
-                            document.getElementById('view-landing')?.classList.remove('active');
-                            document.getElementById('view-login')?.classList.add('active');
-                        } else {
-                            // Complete profile - go to home
-                            console.log('✅ Profile complete');
-                            localStorage.setItem('laundryUser', JSON.stringify(userData));
-                            if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
-                                globalNav.loadUserData(userData);
-                            }
-                            if (typeof accountApp !== 'undefined') {
-                                accountApp.updateProfileVisibility(true);
-                            }
-                            document.getElementById('view-landing')?.classList.remove('active');
-                            document.getElementById('view-login')?.classList.remove('active');
-                            document.getElementById('view-home')?.classList.add('active');
-                            if (typeof ordersApp !== 'undefined') ordersApp.init();
-                        }
-                    }
-                }).catch(error => {
-                    console.error('❌ Database error:', error);
-                });
-                return;
-            }
-
-            // Store in localStorage
-            localStorage.setItem('googleUser', JSON.stringify(currentUser));
-
-            // Trigger UI update
-            if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
-                globalNav.loadUserData({
-                    email: currentUser.email,
-                    name: currentUser.name
-                });
-            }
-
-            // Hide One Tap prompt
-            document.getElementById('g_id_onload')?.remove();
-        }
-
-        function parseJwt(token) {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-            return JSON.parse(jsonPayload);
-        }
-
-        function signOutUser() {
-            currentUser = null;
-            localStorage.removeItem('googleUser');
-            google.accounts.id.disableAutoSelect();
-            console.log('👋 User signed out');
-            location.reload();
-        }
-
-        // Initialize Google One Tap on page load
-        window.addEventListener('load', () => {
-            // Check if user is already logged in
-            const storedUser = localStorage.getItem('googleUser');
-            if (storedUser) {
-                currentUser = JSON.parse(storedUser);
-                if (typeof globalNav !== 'undefined' && globalNav.loadUserData) {
-                    globalNav.loadUserData({
-                        email: currentUser.email,
-                        name: currentUser.name
-                    });
-                }
-            }
-
-            // Initialize Google One Tap
-            if (typeof google !== 'undefined' && google.accounts) {
-                google.accounts.id.initialize({
-                    client_id: '438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com',
-                    callback: handleGoogleSignIn,
-                    auto_select: false,
-                    cancel_on_tap_outside: true
-                });
-
-                // Show One Tap prompt if not logged in
-                if (!currentUser) {
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            console.log('One Tap not displayed:', notification.getNotDisplayedReason());
-                        }
-                    });
-                }
-            }
-        });
 
         // --- 2. APP MODULES ---
 
@@ -2831,8 +2698,8 @@
             closeModal(id) { document.getElementById(id).style.display = 'none'; },
             saveData() {
                 this.closeModal('confirmModal');
-                // Use Google One Tap currentUser instead of Firebase auth
-                if (currentUser && currentUser.uid) {
+                const currentUser = auth.currentUser;
+                if (currentUser) {
                     const userData = landingApp.checkExistingUser() || {};
                     userData.name = document.getElementById('inpName').value;
                     userData.phone = document.getElementById('inpPhone').value;
@@ -3250,39 +3117,19 @@
                 });
             },
             handleGoogleAuth: () => {
-                // Force re-initialization and prompt to bypass cooldown
-                if (typeof google !== 'undefined' && google.accounts) {
-                    // Re-initialize to ensure fresh state
-                    google.accounts.id.initialize({
-                        client_id: '438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com',
-                        callback: handleGoogleSignIn,
-                        auto_select: false,
-                        cancel_on_tap_outside: true
+                auth.signInWithPopup(provider)
+                    .then((result) => { console.log("Google Sign In Success"); })
+                    .catch((error) => {
+                        console.error("Auth Error:", error);
+                        accountApp.showToast("Login Failed: " + error.message, 'error');
                     });
-
-                    // Show prompt with a slight delay
-                    setTimeout(() => {
-                        google.accounts.id.prompt((notification) => {
-                            if (notification.isNotDisplayed()) {
-                                console.log('⚠️ One Tap reason:', notification.getNotDisplayedReason());
-                                if (notification.getNotDisplayedReason() === 'suppressed_by_user') {
-                                    // If suppressed, we can try to reset
-                                    document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-                                    google.accounts.id.prompt();
-                                } else {
-                                    accountApp.showToast("Please check popup blocker", 'warning');
-                                }
-                            }
-                        });
-                    }, 50);
-                } else {
-                    accountApp.showToast("Google Sign-In not loaded yet", 'error');
-                }
             },
             confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
             performLogout: () => {
-                // Use Google One Tap sign out
-                signOutUser();
+                auth.signOut().then(() => {
+                    localStorage.removeItem('laundryUser');
+                    location.reload();
+                }).catch((error) => { console.error("Sign Out Error", error); });
             }
         };
 
@@ -3303,16 +3150,13 @@
                 document.getElementById('home-address-display').innerText = shortAddr;
             },
             goToApp: () => {
-                // Use Google One Tap currentUser instead of Firebase auth
-                if (!currentUser || !currentUser.uid) {
-                    accountApp.showToast("Authentication Error. Please sign in.", 'error');
-                    return;
-                }
+                const currentUser = auth.currentUser;
+                if (!currentUser) { accountApp.showToast("Authentication Error. Please restart.", 'error'); return; }
                 const userData = {
                     uid: currentUser.uid,
                     name: document.getElementById('fullName').value,
                     phone: document.getElementById('whatsapp').value,
-                    address: document.getElementById('areaSearch').value,
+                    address: document.getElementById('areaSearch').value,  // Changed from 'address' to 'areaSearch'
                     landmark: document.getElementById('landmark').value,
                     email: currentUser.email
                 };
@@ -3325,7 +3169,6 @@
                         document.getElementById('view-login').classList.remove('active');
                         document.getElementById('view-home').classList.add('active');
                         globalNav.loadUserData(userData);
-                        if (typeof accountApp !== 'undefined') accountApp.updateProfileVisibility(true);
                         accountApp.showToast("Welcome!");
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     })
@@ -3359,7 +3202,7 @@
             data: [],
             currentCancelOrder: null,
             init() {
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) return;
                 const ordersRef = db.ref('orders').orderByChild('userId').equalTo(user.uid);
                 ordersRef.on('value', (snapshot) => {
@@ -3813,7 +3656,7 @@
             },
             init() { this.fetchProducts(); },
             fetchPinnedItems() {
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) { this.data.pinnedMap = {}; return; }
                 db.ref('users/' + user.uid + '/pinned').on('value', (snapshot) => {
                     this.data.pinnedMap = snapshot.val() || {};
@@ -3973,7 +3816,7 @@
                 this.cancelPress(e);
             },
             togglePin(id) {
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) {
                     accountApp.showToast("Please login to pin items", 'warning');
                     return;
@@ -4244,7 +4087,7 @@
                 return '₹' + grandTotal;
             },
             placeOrder() {
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) {
                     accountApp.showToast("Please login to place order", 'warning');
                     globalNav.switchView('landing');
@@ -4519,7 +4362,7 @@
             },
 
             initChat() {
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) {
                     console.error('❌ No user logged in');
                     accountApp.showToast('Please login to use support chat', 'warning');
@@ -4577,7 +4420,7 @@
                 const message = input.value.trim();
                 if (message === '') return;
 
-                const user = currentUser; // Change from auth.currentUser
+                const user = auth.currentUser;
                 if (!user) {
                     accountApp.showToast('Please login to send messages', 'warning');
                     return;
@@ -4601,7 +4444,7 @@
                 // Save message to user's chat
                 const messageData = {
                     sender: 'user',
-                    senderName: user.name || 'User',
+                    senderName: user.displayName || 'User',
                     message: message,
                     timestamp: timestamp
                 };
@@ -4616,9 +4459,9 @@
                         lastMessage: message,
                         lastMessageTime: timestamp,
                         updatedAt: timestamp,
-                        userName: user.name || 'User',
+                        userName: user.displayName || 'User',
                         userEmail: user.email || 'No email',
-                        userPhone: 'No phone'
+                        userPhone: user.phoneNumber || 'No phone'
                     }).catch(err => console.error('❌ Error updating chat metadata:', err));
 
                 }).catch(err => {
@@ -4749,50 +4592,48 @@
             // Initialize splash manager
             splashManager.init();
 
-            themeApp.init();
+            themeApp.init(); // Initialize Theme
             homeApp.init();
-            swipeHandler.init();
-            historyManager.init();
+            swipeHandler.init(); // Initialize swipe gestures
+            historyManager.init(); // Initialize back button support
 
+            // Initialize service areas early (after Firebase is ready)
             console.log('🌍 Initializing service areas...');
             if (typeof areaValidation !== 'undefined') {
                 areaValidation.init();
+            } else {
+                console.error('❌ areaValidation not defined!');
             }
 
+            // Initialize phone number validation
             console.log('📱 Initializing phone validation...');
             if (typeof phoneValidation !== 'undefined') {
                 phoneValidation.init();
+            } else {
+                console.error('❌ phoneValidation not defined!');
             }
 
-            // Check authentication status on page load
-            function checkAuthStatus() {
-                if (currentUser && currentUser.uid) {
-                    console.log("✅ User detected:", currentUser.uid);
-                    const storedUserData = localStorage.getItem('laundryUser');
-                    if (storedUserData) {
-                        const userData = JSON.parse(storedUserData);
-                        globalNav.loadUserData(userData);
-                        globalNav.switchView('home');
-                        if (typeof ordersApp !== 'undefined') ordersApp.init();
+            if (typeof auth !== 'undefined') {
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        console.log("User detected:", user.uid);
+                        landingApp.checkDbAndRedirect(user);
+                        homeApp.fetchPinnedItems();
+                        // Update profile to show user is logged in
+                        accountApp.updateProfileVisibility(true);
                     } else {
-                        // User logged in but no profile data - check database
-                        landingApp.checkDbAndRedirect(currentUser);
+                        console.log("No user signed in.");
+                        homeApp.data.pinnedMap = {};
+                        homeApp.renderProducts();
+                        // Update profile to show locked state
+                        accountApp.updateProfileVisibility(false);
+
                     }
-                    homeApp.fetchPinnedItems();
-                    accountApp.updateProfileVisibility(true);
-                } else {
-                    console.log("❌ No user signed in");
-                    homeApp.data.pinnedMap = {};
-                    homeApp.renderProducts();
-                    accountApp.updateProfileVisibility(false);
-                }
 
-                // Mark auth as ready for splash screen
-                splashManager.markAuthReady();
+                    // Mark auth as ready for splash screen
+                    splashManager.markAuthReady();
+                });
             }
-
-            // Call check on page load
-            checkAuthStatus();
         });
 
         // Old splash screen logic removed - now managed by splashManager
