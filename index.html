@@ -8,6 +8,9 @@
     <title>Laundry Express</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&family=JetBrains+Mono:wght@300;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -99,22 +102,54 @@
             --bg-body: #e4fde1;
             /* Hint of Green (Lightest) */
             --bg-card: #ffffff;
-            /* White Cards */
-            --bg-panel: #d6f5d3;
-            /* Slightly darker than body for panels */
+            /* White */
+            --bg-panel: #ffffff;
+            /* White Panel */
             --text-main: #1b3022;
-            /* Celtic (Darkest Green) */
+            /* Deep Forest Green */
             --text-sub: #3b5249;
-            /* Mineral Green */
+            /* Medium Green */
             --text-on-primary: #ffffff;
             --border-color: #8acb88;
-            /* De York */
+            /* Fresh Green Border */
             --primary-action: #519872;
-            /* Aqua Forest */
+            /* Green Action */
             --primary-action-text: #ffffff;
             --shadow-subtle: 0 4px 12px rgba(27, 48, 34, 0.08);
             --shadow-strong: 0 8px 24px rgba(27, 48, 34, 0.15);
         }
+
+        /* Loom Theme */
+        [data-theme="loom"] {
+            /* Palette: #f4f2ef, #1a1a1a, #3b5bdb, #d1cfcc, #ffffff */
+            --bg-body: #f4f2ef;
+            --bg-card: #ffffff;
+            --bg-panel: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #1a1a1a;
+            /* Using dark for subtext too per design aesthetic */
+            --text-on-primary: #ffffff;
+            --border-color: #d1cfcc;
+            --primary-action: #1a1a1a;
+            --primary-action-text: #ffffff;
+            --shadow-subtle: 20px 20px 60px rgba(0, 0, 0, 0.06);
+            --shadow-strong: 30px 40px 80px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Loom Font Override */
+        body[data-theme="loom"] {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body[data-theme="loom"] .system-status,
+        body[data-theme="loom"] .progress-meta,
+        body[data-theme="loom"] .spec,
+        body[data-theme="loom"] .action-cost,
+        body[data-theme="loom"] aside {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+
 
         /* Urban Light Theme - Shades of Teal */
         [data-theme="purple"] {
@@ -1272,18 +1307,30 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            background: var(--col-mist);
+            background: white;
+            /* High contrast white */
             color: var(--text-main);
-            width: 32px;
-            height: 32px;
+            width: 42px;
+            /* Increased from 32px */
+            height: 42px;
+            /* Increased from 32px */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 13px;
-            border: 1px solid white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            /* Increased from 13px */
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            /* Stronger shadow */
+            z-index: 10;
+            transition: transform 0.2s ease, background 0.2s;
+        }
+
+        .pc-edit-fab:active {
+            transform: scale(0.92);
+            background: #f0f0f0;
         }
 
         .pc-content {
@@ -1494,46 +1541,36 @@
 
         #toast {
             visibility: hidden;
-            min-width: 160px;
-            max-width: 200px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            min-width: 280px;
+            max-width: 90%;
+            background: var(--bg-panel);
             color: var(--text-main);
-            text-align: center;
-            border-radius: 50px;
-            padding: 10px 16px;
+            border-radius: 12px;
+            padding: 16px 20px;
             position: fixed;
             z-index: 10000;
-            top: -50px;
+            top: -80px;
             left: 50%;
-            transform: translateX(-50%) scale(0.95);
-            font-size: 13px;
+            transform: translateX(-50%);
+            font-size: 14px;
             font-weight: 600;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
             opacity: 0;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            gap: 12px;
         }
 
-        /* Dark glass effect for dark themes */
-        [data-theme="dark"] #toast,
-        [data-theme="green"] #toast,
-        [data-theme="purple"] #toast {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
+        /* Removed glass effect overrides as we use solid theme colors now */
 
         #toast.show {
             visibility: visible;
             opacity: 1;
             top: 30px;
-            transform: translateX(-50%) scale(1);
-            animation: toastSlideScale 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translateX(-50%);
+            animation: toastSlideScale 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         @keyframes toastSlideScale {
@@ -1968,6 +2005,16 @@
                     <div class="theme-color-dot" style="background:#008080;"></div> <!-- Teal -->
                 </div>
             </div>
+
+            <!-- Loom Tactile Theme -->
+            <div class="theme-card" onclick="themeApp.select('loom')" id="theme-card-loom">
+                <div style="font-weight: 600; font-size: 15px;">Loom Tactile</div>
+                <div class="theme-colors">
+                    <div class="theme-color-dot" style="background:#f4f2ef; border: 1px solid #ccc;"></div>
+                    <div class="theme-color-dot" style="background:#1a1a1a;"></div>
+                    <div class="theme-color-dot" style="background:#3b5bdb;"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1988,16 +2035,16 @@
 
                         <div class="login-input-group">
                             <label class="login-label" for="fullName">Full Name</label>
-                            <input class="login-input" type="text" id="fullName" placeholder="e.g. Rahul Sharma"
-                                required>
+                            <input class="login-input" type="text" id="fullName" placeholder="Enter your Name" required>
                         </div>
 
                         <div class="login-input-group">
                             <label class="login-label" for="whatsapp">WhatsApp Number</label>
                             <div class="phone-wrapper">
                                 <span class="country-code">+91</span>
-                                <input class="login-input" type="tel" id="whatsapp" placeholder="98765 43210"
-                                    pattern="[0-9]{10}" maxlength="10" inputmode="numeric" autocomplete="tel" required>
+                                <input class="login-input" type="tel" id="whatsapp"
+                                    placeholder="Enter your Phone Number" pattern="[0-9]{10}" maxlength="10"
+                                    inputmode="numeric" autocomplete="tel" required>
                             </div>
                         </div>
 
@@ -2183,7 +2230,8 @@
                     <div id="static-info">
                         <div class="pc-name" id="display-name">Loading...</div>
                         <div class="pc-phone">
-                            <i class="fas fa-phone-alt" style="font-size:11px; opacity:0.7;"></i>
+                            <i class="fas fa-phone-alt"
+                                style="font-size:11px; opacity:0.7; transform: rotate(90deg); display:inline-block;"></i>
                             <span id="display-phone">Loading...</span>
                         </div>
                         <div class="pc-phone" style="margin-top:6px; font-size:12px;">
@@ -2849,7 +2897,8 @@
                     'dark': 'Dark Mode',
                     'blue': 'Midnight Blue',
                     'green': 'Forest Green',
-                    'purple': 'Royal Purple'
+                    'purple': 'Royal Purple',
+                    'loom': 'Loom Tactile'
                 };
                 label.innerText = names[themeName] || 'Select your style';
             }
