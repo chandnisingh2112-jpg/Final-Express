@@ -12,7 +12,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <!-- Google One Tap Sign-In -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
@@ -239,21 +238,14 @@
             padding-bottom: 0;
         }
 
+        #view-orders.view-section {
+            padding-bottom: 20px;
+        }
+
         #view-info.view-section {
             padding-bottom: 0;
             height: 100vh;
             overflow: hidden;
-        }
-
-        #view-login.view-section {
-            padding-bottom: 0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 2000;
-            background: var(--bg-body);
         }
 
         .view-section.active {
@@ -364,9 +356,6 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            overflow-y: auto;
-            touch-action: pan-y;
-            -webkit-overflow-scrolling: touch;
         }
 
         .login-card {
@@ -835,6 +824,11 @@
 
         .btn-count:active {
             transform: scale(0.9);
+            transition: transform 0.1s ease;
+        }
+
+        .btn-count:hover {
+            background: #e5e5e5;
         }
 
         .btn-count.active {
@@ -960,9 +954,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
             font-size: 12px;
+            transition: background 0.2s ease;
+        }
+
+        .bag-item:hover {
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .bag-item:last-child {
+            border-bottom: none;
         }
 
         .price-tag {
@@ -1047,8 +1050,8 @@
 
         .full-btn {
             width: 100%;
-            background: var(--text-main);
-            color: white;
+            background: var(--primary-action);
+            color: var(--primary-action-text);
             padding: 16px;
             border: none;
             border-radius: 16px;
@@ -1058,9 +1061,10 @@
             cursor: pointer;
         }
 
+        /* Dark theme uses same variables - no override needed */
         [data-theme="dark"] .full-btn {
-            background: var(--col-nomad);
-            color: var(--col-shark);
+            background: var(--primary-action);
+            color: var(--primary-action-text);
         }
 
         .full-btn:disabled {
@@ -1409,26 +1413,27 @@
             font-size: 11px;
             font-weight: 600;
             color: var(--text-sub);
-            /* Use theme colors */
+            /* Subtle gray/black for inactive state */
             cursor: pointer;
-            transition: 0.3s;
+            transition: color 0.3s ease, transform 0.3s ease;
             position: relative;
             gap: 4px;
         }
 
         .nav-item i {
             font-size: 22px;
-            transition: 0.3s;
+            transition: color 0.3s ease;
         }
 
         .nav-item.active {
-            color: var(--primary-accent);
-            /* Blue accent */
+            color: var(--primary-action);
+            /* Theme color for active state */
             transform: scale(1.05);
         }
 
         .nav-item.active i {
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            color: var(--primary-action);
+            /* Ensure icon also uses theme color */
         }
 
         .cart-badge-dot {
@@ -1446,6 +1451,22 @@
         /* Helpers */
         .hidden {
             display: none !important;
+        }
+
+        @keyframes fadeOutSlide {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+        }
+
+        .item-removing {
+            animation: fadeOutSlide 0.3s ease-out;
         }
 
         .btn-save {
@@ -1474,34 +1495,102 @@
 
         #toast {
             visibility: hidden;
-            min-width: 250px;
-            background-color: #2d3436;
-            /* Dark background */
-            color: #ffffff;
+            min-width: 160px;
+            max-width: 200px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-main);
             text-align: center;
             border-radius: 50px;
-            padding: 16px 24px;
+            padding: 10px 16px;
             position: fixed;
             z-index: 10000;
-            top: -100px;
+            top: -50px;
             left: 50%;
-            transform: translateX(-50%);
-            font-size: 14px;
+            transform: translateX(-50%) scale(0.95);
+            font-size: 13px;
             font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             opacity: 0;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 6px;
+        }
+
+        /* Dark glass effect for dark themes */
+        [data-theme="dark"] #toast,
+        [data-theme="green"] #toast,
+        [data-theme="purple"] #toast {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         #toast.show {
             visibility: visible;
             opacity: 1;
-            top: 40px;
-            /* Display at top */
+            top: 30px;
+            transform: translateX(-50%) scale(1);
+            animation: toastSlideScale 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes toastSlideScale {
+            0% {
+                top: -50px;
+                opacity: 0;
+                transform: translateX(-50%) scale(0.95);
+            }
+
+            60% {
+                top: 35px;
+                transform: translateX(-50%) scale(1.02);
+            }
+
+            100% {
+                top: 30px;
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+
+        #toast.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        #toast.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        #toast.warning {
+            border-left: 4px solid #f39c12;
+        }
+
+        #toast.info {
+            border-left: 4px solid #3498db;
+        }
+
+        #toast .toast-icon {
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        #toast.success .toast-icon {
+            color: #27ae60;
+        }
+
+        #toast.error .toast-icon {
+            color: #e74c3c;
+        }
+
+        #toast.warning .toast-icon {
+            color: #f39c12;
+        }
+
+        #toast.info .toast-icon {
+            color: #3498db;
         }
 
         /* Order Success */
@@ -1773,8 +1862,6 @@
 
 <body data-theme="light">
 
-    <!-- Google Sign-In (Popup mode - no auto prompt) -->
-
     <!-- Splash Screen -->
     <div id="splash-screen">
         <div class="splash-content">
@@ -1911,7 +1998,7 @@
                             <div class="phone-wrapper">
                                 <span class="country-code">+91</span>
                                 <input class="login-input" type="tel" id="whatsapp" placeholder="98765 43210"
-                                    pattern="[0-9]{10}" required>
+                                    pattern="[0-9]{10}" maxlength="10" inputmode="numeric" autocomplete="tel" required>
                             </div>
                         </div>
 
@@ -2036,16 +2123,6 @@
 
         <div class="app-container" id="orders-list-container">
         </div>
-
-        <div class="bottom-nav">
-            <div class="nav-item" onclick="globalNav.switchView('home')">
-                <i class="fas fa-home"></i> <span>Home</span>
-            </div>
-            <div class="nav-item" onclick="globalNav.switchView('home'); setTimeout(()=> homeApp.navTo('cart'), 100);">
-                <i class="fas fa-shopping-bag"></i> <span>Cart</span>
-                <div class="cart-badge-dot" id="cartBadgeOrders"></div>
-            </div>
-        </div>
     </div>
 
     <div id="view-info" class="view-section">
@@ -2138,7 +2215,8 @@
                         </div>
                         <div class="login-input-group">
                             <label class="login-label">Phone</label>
-                            <input class="login-input" type="tel" id="inpPhone">
+                            <input class="login-input" type="tel" id="inpPhone" maxlength="10" inputmode="numeric"
+                                autocomplete="tel">
                         </div>
                         <div class="login-input-group">
                             <label class="login-label">Address</label>
@@ -2550,7 +2628,10 @@
             Shopping</button>
     </div>
 
-    <div id="toast">Data Saved Successfully!</div>
+    <div id="toast">
+        <span class="toast-icon"></span>
+        <span class="toast-text">Data Saved Successfully!</span>
+    </div>
 
     <script>
 
@@ -2617,7 +2698,7 @@
                         const userData = snapshot.val();
                         if (!userData.phone || !userData.address) {
                             // Incomplete profile
-                            console.log('⚠️  Incomplete profile - showing form');
+                            console.log('⚠️ Incomplete profile - showing form');
                             setTimeout(() => {
                                 if (userData.name) document.getElementById('fullName').value = userData.name;
                                 if (userData.phone) document.getElementById('whatsapp').value = userData.phone;
@@ -2645,7 +2726,7 @@
                 }).catch(error => {
                     console.error('❌ Database error:', error);
                 });
-                return; // Don't execute code below - everything handled in callback
+                return;
             }
 
             // Store in localStorage
@@ -2677,7 +2758,6 @@
             localStorage.removeItem('googleUser');
             google.accounts.id.disableAutoSelect();
             console.log('👋 User signed out');
-            // Reload page or redirect to login
             location.reload();
         }
 
@@ -2700,7 +2780,7 @@
                 google.accounts.id.initialize({
                     client_id: '438360888346-qbnrqr9kpdnnv9i8805fsu83kvni3jpg.apps.googleusercontent.com',
                     callback: handleGoogleSignIn,
-                    auto_select: false,  // Disabled - only show on button click
+                    auto_select: false,
                     cancel_on_tap_outside: true
                 });
 
@@ -2762,7 +2842,7 @@
                     // Validate area first
                     const areaInput = document.getElementById('inpLoc').value.trim();
                     if (!areaValidation.validateArea(areaInput, 'inpLoc', 'accountAreaError')) {
-                        accountApp.showToast("Service not available in this area");
+                        accountApp.showToast("Service not available in this area", 'error');
                         return;
                     }
 
@@ -2775,14 +2855,34 @@
                         })
                         .catch(err => {
                             console.error(err);
-                            this.showToast("Error saving data");
+                            this.showToast("Error saving data", 'error');
                         });
                 }
             },
-            showToast(msg) {
-                const x = document.getElementById("toast");
-                x.innerText = msg; x.className = "show";
-                setTimeout(() => x.className = x.className.replace("show", ""), 3000);
+            showToast(msg, type = 'success') {
+                const toast = document.getElementById("toast");
+                const iconEl = toast.querySelector('.toast-icon');
+                const textEl = toast.querySelector('.toast-text');
+
+                // Set message text
+                textEl.innerText = msg;
+
+                // Set icon based on type
+                const icons = {
+                    'success': '✓',
+                    'error': '✕',
+                    'warning': '⚠',
+                    'info': 'ℹ'
+                };
+                iconEl.innerText = icons[type] || icons['success'];
+
+                // Apply type class
+                toast.className = `show ${type}`;
+
+                // Auto-hide after 2.5 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2500);
             },
             showAppInfo() {
                 globalNav.switchView('info');
@@ -3139,7 +3239,6 @@
                         localStorage.setItem('laundryUser', JSON.stringify(userData));
                         globalNav.loadUserData(userData);
                         globalNav.switchView('home');
-                        if (typeof accountApp !== 'undefined') accountApp.updateProfileVisibility(true);
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     } else {
                         document.getElementById('view-landing').classList.remove('active');
@@ -3147,7 +3246,7 @@
                     }
                 }).catch((error) => {
                     console.error("Database error:", error);
-                    accountApp.showToast("Error connecting to database.");
+                    accountApp.showToast("Error connecting to database.", 'error');
                 });
             },
             handleGoogleAuth: () => {
@@ -3171,13 +3270,13 @@
                                     document.cookie = `g_state=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT`;
                                     google.accounts.id.prompt();
                                 } else {
-                                    accountApp.showToast("Please check popup blocker");
+                                    accountApp.showToast("Please check popup blocker", 'warning');
                                 }
                             }
                         });
                     }, 50);
                 } else {
-                    accountApp.showToast("Google Sign-In not loaded yet");
+                    accountApp.showToast("Google Sign-In not loaded yet", 'error');
                 }
             },
             confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
@@ -3206,14 +3305,14 @@
             goToApp: () => {
                 // Use Google One Tap currentUser instead of Firebase auth
                 if (!currentUser || !currentUser.uid) {
-                    accountApp.showToast("Authentication Error. Please sign in.");
+                    accountApp.showToast("Authentication Error. Please sign in.", 'error');
                     return;
                 }
                 const userData = {
                     uid: currentUser.uid,
                     name: document.getElementById('fullName').value,
                     phone: document.getElementById('whatsapp').value,
-                    address: document.getElementById('areaSearch').value,  // Changed from 'address' to 'areaSearch'
+                    address: document.getElementById('areaSearch').value,
                     landmark: document.getElementById('landmark').value,
                     email: currentUser.email
                 };
@@ -3232,7 +3331,7 @@
                     })
                     .catch((error) => {
                         console.error("Save Error:", error);
-                        accountApp.showToast("Failed to save data.");
+                        accountApp.showToast("Failed to save data.", 'error');
                         btn.innerHTML = originalText;
                     });
             },
@@ -3260,7 +3359,7 @@
             data: [],
             currentCancelOrder: null,
             init() {
-                const user = auth.currentUser;
+                const user = currentUser; // Change from auth.currentUser
                 if (!user) return;
                 const ordersRef = db.ref('orders').orderByChild('userId').equalTo(user.uid);
                 ordersRef.on('value', (snapshot) => {
@@ -3296,7 +3395,7 @@
                     })
                     .catch((error) => {
                         console.error('❌ Failed to cancel order:', error);
-                        accountApp.showToast('Failed to cancel order. Please try again.');
+                        accountApp.showToast('Failed to cancel order. Please try again.', 'error');
                     });
             },
             render() {
@@ -3383,7 +3482,11 @@
             availableAreas: [],
 
             init() {
-                this.fetchAreas();
+                console.log('🚀 Initializing area validation...');
+                // Small delay to ensure Firebase is fully ready
+                setTimeout(() => {
+                    this.fetchAreas();
+                }, 500);
             },
 
             attach(inputId, suggestionsId, errorId) {
@@ -3423,28 +3526,84 @@
                 }
             },
 
-            fetchAreas() {
-                if (typeof db !== 'undefined') {
-                    db.ref('serviceAreas').once('value')
-                        .then((snapshot) => {
-                            if (snapshot.exists()) {
-                                const data = snapshot.val();
-                                if (Array.isArray(data)) {
-                                    this.availableAreas = data;
-                                } else if (typeof data === 'object') {
-                                    this.availableAreas = Object.values(data);
-                                }
-                                console.log('✅ Loaded service areas:', this.availableAreas);
+            fetchAreas(retryCount = 0) {
+                console.log('🔍 Fetching service areas... (Attempt ' + (retryCount + 1) + ')');
+                console.log('📡 Firebase initialized:', typeof firebase !== 'undefined' && firebase.apps.length > 0);
+                console.log('🗄️ Database reference exists:', typeof db !== 'undefined');
+
+                if (typeof db === 'undefined') {
+                    console.error('❌ Database not initialized!');
+                    if (retryCount < 3) {
+                        console.log('⏳ Retrying in 1 second...');
+                        setTimeout(() => this.fetchAreas(retryCount + 1), 1000);
+                    } else {
+                        console.error('❌ Failed to initialize database after 3 attempts');
+                        accountApp.showToast('Failed to load service areas. Please refresh.', 'error');
+                    }
+                    return;
+                }
+
+                console.log('📍 Fetching from path: serviceAreas');
+
+                db.ref('serviceAreas').once('value')
+                    .then((snapshot) => {
+                        console.log('📦 Snapshot exists:', snapshot.exists());
+
+                        if (snapshot.exists()) {
+                            const data = snapshot.val();
+                            console.log('📊 Raw data type:', typeof data);
+                            console.log('📊 Is Array:', Array.isArray(data));
+                            console.log('📊 Raw data:', data);
+
+                            if (Array.isArray(data)) {
+                                // Filter out null/undefined values
+                                this.availableAreas = data.filter(area => area != null && area !== '');
+                                console.log('✅ Loaded as ARRAY:', this.availableAreas);
+                            } else if (typeof data === 'object' && data !== null) {
+                                // Convert object to array and filter
+                                this.availableAreas = Object.values(data).filter(area => area != null && area !== '');
+                                console.log('✅ Loaded as OBJECT (converted to array):', this.availableAreas);
+                            } else if (typeof data === 'string') {
+                                // Single string value
+                                this.availableAreas = [data];
+                                console.log('✅ Loaded as STRING:', this.availableAreas);
                             } else {
                                 this.availableAreas = [];
-                                console.log('⚠️ No service areas found in database.');
+                                console.warn('⚠️ Unexpected data format:', typeof data);
                             }
-                        })
-                        .catch((error) => {
-                            console.error('Error fetching areas from DB:', error);
+
+                            console.log('✅ Final available areas count:', this.availableAreas.length);
+
+                            if (this.availableAreas.length === 0) {
+                                console.warn('⚠️ No valid areas found in database');
+                                accountApp.showToast('No service areas configured. Contact support.', 'warning');
+                            }
+                        } else {
                             this.availableAreas = [];
-                        });
-                }
+                            console.log('⚠️ serviceAreas node does not exist in database');
+                            console.log('💡 Suggestion: Create serviceAreas in Firebase with area names');
+                            accountApp.showToast('Service areas not configured. Please contact support.', 'warning');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('❌ Error fetching areas from database:');
+                        console.error('Error code:', error.code);
+                        console.error('Error message:', error.message);
+                        console.error('Full error:', error);
+
+                        this.availableAreas = [];
+
+                        // Check for permission errors
+                        if (error.code === 'PERMISSION_DENIED') {
+                            console.error('❌ PERMISSION DENIED - Check Firebase Database Rules');
+                            accountApp.showToast('Database access denied. Check permissions.', 'error');
+                        } else if (retryCount < 2) {
+                            console.log('⏳ Retrying fetch in 1.5 seconds...');
+                            setTimeout(() => this.fetchAreas(retryCount + 1), 1500);
+                        } else {
+                            accountApp.showToast('Failed to load service areas. Refresh the page.', 'error');
+                        }
+                    });
             },
 
             showSuggestions(input, suggestionsId, inputId, errorId) {
@@ -3519,11 +3678,91 @@
             }
         };
 
+        // Phone Number Validation Utility
+        const phoneValidation = {
+            init() {
+                // Attach to both phone input fields
+                this.attachValidation('whatsapp');
+                this.attachValidation('inpPhone');
+            },
+
+            attachValidation(inputId) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+
+                console.log(`📱 Attached phone validation to #${inputId}`);
+
+                // Real-time filtering - only allow numbers
+                input.addEventListener('input', (e) => {
+                    let value = e.target.value;
+
+                    // Remove all non-numeric characters
+                    value = value.replace(/\D/g, '');
+
+                    // Limit to 10 digits
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+
+                    e.target.value = value;
+
+                    // Update visual feedback
+                    this.updateVisualFeedback(input, value);
+                });
+
+                // Validation on blur
+                input.addEventListener('blur', (e) => {
+                    const value = e.target.value;
+                    this.validatePhone(input, value);
+                });
+
+                // Clear error on focus
+                input.addEventListener('focus', (e) => {
+                    e.target.classList.remove('error');
+                });
+            },
+
+            updateVisualFeedback(input, value) {
+                if (value.length === 10) {
+                    input.classList.remove('error');
+                    input.classList.add('valid');
+                } else if (value.length > 0) {
+                    input.classList.remove('valid');
+                } else {
+                    input.classList.remove('valid', 'error');
+                }
+            },
+
+            validatePhone(input, value) {
+                if (value.length === 0) {
+                    // Empty is okay (will be caught by required attribute)
+                    input.classList.remove('error', 'valid');
+                    return true;
+                } else if (value.length === 10) {
+                    input.classList.remove('error');
+                    input.classList.add('valid');
+                    return true;
+                } else {
+                    input.classList.remove('valid');
+                    input.classList.add('error');
+                    return false;
+                }
+            },
+
+            isValid(inputId) {
+                const input = document.getElementById(inputId);
+                if (!input) return false;
+
+                const value = input.value.trim();
+                return value.length === 10 && /^\d{10}$/.test(value);
+            }
+        };
+
         const loginApp = {
             nextStep: () => {
                 const name = document.getElementById('fullName').value;
                 const phone = document.getElementById('whatsapp').value;
-                if (name === "" || phone === "") { accountApp.showToast("Please fill in all fields."); return; }
+                if (name === "" || phone === "") { accountApp.showToast("Please fill in all fields.", 'warning'); return; }
                 document.getElementById('step1').classList.remove('active');
                 document.getElementById('step2').classList.add('active');
                 document.getElementById('step2Indicator').classList.add('active');
@@ -3549,13 +3788,13 @@
 
                 // Validate area first
                 if (areaInput === "" || landmark === "") {
-                    accountApp.showToast("Please provide all location details.");
+                    accountApp.showToast("Please provide all location details.", 'warning');
                     return;
                 }
 
                 // Check if area is valid
                 if (!areaValidation.validateArea(areaInput, 'areaSearch', 'areaError')) {
-                    accountApp.showToast("Service not available in this area");
+                    accountApp.showToast("Service not available in this area", 'error');
                     return;
                 }
 
@@ -3574,7 +3813,7 @@
             },
             init() { this.fetchProducts(); },
             fetchPinnedItems() {
-                const user = auth.currentUser;
+                const user = currentUser; // Change from auth.currentUser
                 if (!user) { this.data.pinnedMap = {}; return; }
                 db.ref('users/' + user.uid + '/pinned').on('value', (snapshot) => {
                     this.data.pinnedMap = snapshot.val() || {};
@@ -3589,7 +3828,7 @@
                     if (!val) {
                         console.log("❌ No products found in DB");
                         this.data.products = [];
-                        accountApp.showToast("No products available");
+                        accountApp.showToast("No products available", 'warning');
                         return;
                     }
 
@@ -3624,9 +3863,19 @@
                     });
 
                     this.renderProducts();
+
+                    // Mark products as ready for splash screen
+                    if (typeof splashManager !== 'undefined') {
+                        splashManager.markProductsReady();
+                    }
                 }, (error) => {
                     console.error("❌ Error loading products:", error);
-                    accountApp.showToast("Failed to load products");
+                    accountApp.showToast("Failed to load products", 'error');
+
+                    // Even on error, mark as ready to not block splash
+                    if (typeof splashManager !== 'undefined') {
+                        splashManager.markProductsReady();
+                    }
                 });
             },
             navTo(screen, addHistory = true) {
@@ -3724,9 +3973,9 @@
                 this.cancelPress(e);
             },
             togglePin(id) {
-                const user = auth.currentUser;
+                const user = currentUser; // Change from auth.currentUser
                 if (!user) {
-                    accountApp.showToast("Please login to pin items");
+                    accountApp.showToast("Please login to pin items", 'warning');
                     return;
                 }
                 // Haptic feedback for success
@@ -3744,7 +3993,7 @@
 
                 db.ref().update(updates).catch(err => {
                     console.error("Pinning error", err);
-                    accountApp.showToast("Error updating pin");
+                    accountApp.showToast("Error updating pin", 'error');
                 });
             },
             renderProducts() {
@@ -3850,7 +4099,6 @@
             updateCartBadge() {
                 const hasItems = this.data.bags.length > 0;
                 document.getElementById('cartBadge').style.display = hasItems ? 'block' : 'none';
-                document.getElementById('cartBadgeOrders').style.display = hasItems ? 'block' : 'none';
             },
             commitBag() {
                 const newBagItems = [];
@@ -3864,6 +4112,37 @@
                 document.getElementById('add-to-bag-bar').classList.remove('show');
                 accountApp.showToast("Items added to Cart");
                 this.updateCartBadge();
+            },
+            updateItemQuantity(bagIndex, itemIndex, change) {
+                // Haptic feedback
+                if (navigator.vibrate) navigator.vibrate(20);
+
+                const bag = this.data.bags[bagIndex];
+                if (!bag || !bag.items[itemIndex]) return;
+
+                const item = bag.items[itemIndex];
+                item.qty += change;
+
+                // Remove item if quantity reaches 0
+                if (item.qty <= 0) {
+                    bag.items.splice(itemIndex, 1);
+
+                    // If bag is now empty, delete it
+                    if (bag.items.length === 0) {
+                        this.data.bags.splice(bagIndex, 1);
+                        this.renumberBags();
+                        accountApp.showToast("Empty bag removed");
+                    }
+                }
+
+                this.renderCart();
+                this.updateCartBadge();
+            },
+            renumberBags() {
+                // Renumber all bags sequentially
+                this.data.bags.forEach((bag, index) => {
+                    bag.name = `BAG ${index + 1}`;
+                });
             },
             renderCart() {
                 const container = document.getElementById('bags-container');
@@ -3882,14 +4161,22 @@
                 this.data.bags.forEach((bag, bagIndex) => {
                     let bagTotal = 0;
                     let itemsHtml = '';
-                    bag.items.forEach(item => {
+                    bag.items.forEach((item, itemIndex) => {
                         let itemUnitCost = 0;
                         bag.services.forEach(s => itemUnitCost += item.prices[s]);
                         bagTotal += (itemUnitCost * item.qty);
                         itemsHtml += `
-                            <div class="bag-item">
-                                <div><span style="font-weight:600; color:var(--text-main)">${item.name}</span> <span class="item-badge">x${item.qty}</span></div>
-                                <span class="price-tag">₹${itemUnitCost * item.qty}</span>
+                            <div class="bag-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed rgba(0, 0, 0, 0.1);">
+                                <div style="flex: 1;">
+                                    <span style="font-weight:600; color:var(--text-main); font-size: 13px;">${item.name}</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <div class="counter" style="background: rgba(0, 0, 0, 0.03); padding: 4px; border-radius: 30px; display: flex; align-items: center; gap: 10px;">
+                                        <div class="btn-count" onclick="homeApp.updateItemQuantity(${bagIndex}, ${itemIndex}, -1)" style="width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; color: var(--text-main); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; border: 1px solid rgba(0, 0, 0, 0.15);">−</div>
+                                        <span class="count-val" style="font-weight: 600; min-width: 20px; text-align: center; color: var(--text-main); font-size: 13px;">${item.qty}</span>
+                                        <div class="btn-count active" onclick="homeApp.updateItemQuantity(${bagIndex}, ${itemIndex}, 1)" style="width: 28px; height: 28px; border-radius: 50%; background: #f0f0f0; color: var(--text-main); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; border: 1px solid rgba(0, 0, 0, 0.15);">+</div>
+                                    </div>
+                                </div>
                             </div>`;
                     });
                     const bagDiv = document.createElement('div');
@@ -3921,8 +4208,10 @@
             },
             deleteBag(index) {
                 this.data.bags.splice(index, 1);
+                this.renumberBags();
                 this.renderCart();
                 this.updateCartBadge();
+                accountApp.showToast("Bag removed from cart");
             },
             updateBill() {
                 let itemTotal = 0;
@@ -3955,9 +4244,9 @@
                 return '₹' + grandTotal;
             },
             placeOrder() {
-                // Check if user is logged in (Google One Tap)
-                if (!currentUser || !currentUser.uid) {
-                    accountApp.showToast("Please login to place order");
+                const user = currentUser; // Change from auth.currentUser
+                if (!user) {
+                    accountApp.showToast("Please login to place order", 'warning');
                     globalNav.switchView('landing');
                     return;
                 }
@@ -3971,6 +4260,7 @@
                 btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
                 btn.disabled = true;
                 setTimeout(() => {
+                    const user = auth.currentUser;
                     const orderId = Math.floor(100000 + Math.random() * 900000).toString();
 
                     // Add service type to each bag
@@ -3987,7 +4277,7 @@
                         bags: bagsWithService,
                         items: allItems,
                         total: total,
-                        userId: currentUser ? currentUser.uid : 'guest',
+                        userId: user ? user.uid : 'guest',
                         userName: document.getElementById('display-name').innerText,
                         userPhone: document.getElementById('display-phone').innerText,
                         userLoc: document.getElementById('display-address').innerText
@@ -4002,7 +4292,7 @@
                         })
                         .catch(err => {
                             console.error(err);
-                            accountApp.showToast("Order Failed. Try again.");
+                            accountApp.showToast("Order Failed. Try again.", 'error');
                             btn.disabled = false;
                             btn.innerHTML = 'Place Order';
                         });
@@ -4111,14 +4401,24 @@
         };
 
 
-        // Details App Logic
+        // Details App Logic - Lazy Loading
         const detailsApp = {
             currentTab: 'areas',
+            isLoaded: false, // Track if data has been loaded
 
             open() {
                 globalNav.switchView('details');
-                this.loadAreas();
-                this.loadPrices();
+
+                // Lazy load data only on first open
+                if (!this.isLoaded) {
+                    console.log('📦 Loading details data for first time...');
+                    this.showLoadingState();
+                    this.loadAreas();
+                    this.loadPrices();
+                    this.isLoaded = true;
+                } else {
+                    console.log('✅ Details already loaded, using cached data');
+                }
             },
 
             switchTab(tab) {
@@ -4135,12 +4435,23 @@
                 }
             },
 
+            showLoadingState() {
+                const areasList = document.getElementById('areas-list');
+                const pricesList = document.getElementById('prices-list');
+
+                if (areasList) {
+                    areasList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading areas...</p>';
+                }
+                if (pricesList) {
+                    pricesList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Loading prices...</p>';
+                }
+            },
+
             loadAreas() {
                 const areasList = document.getElementById('areas-list');
 
                 // ⚡ Lazy load: Initialize areas if not already loaded
                 if (typeof areaValidation !== 'undefined' && (!areaValidation.availableAreas || areaValidation.availableAreas.length === 0)) {
-                    areasList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:13px;">Loading areas...</p>';
                     areaValidation.init();
                     // Wait a bit for areas to load, then render
                     setTimeout(() => this.renderAreas(), 500);
@@ -4196,9 +4507,9 @@
             }
         };
 
-        // Support Chat Logic
+        // Support Chat Logic - Stores chat under users/{userId}/supportChat
         const supportChat = {
-            chatId: null,
+            chatPath: null,
             userId: null,
             messagesListener: null,
 
@@ -4208,16 +4519,16 @@
             },
 
             initChat() {
-                const user = auth.currentUser;
+                const user = currentUser; // Change from auth.currentUser
                 if (!user) {
                     console.error('❌ No user logged in');
-                    accountApp.showToast('Please login to use support chat');
+                    accountApp.showToast('Please login to use support chat', 'warning');
                     return;
                 }
 
                 this.userId = user.uid;
-                this.chatId = this.userId;
-                console.log('💬 Initializing chat:', this.userId);
+                this.chatPath = `users/${this.userId}/supportChat`;
+                console.log('💬 Initializing chat at:', this.chatPath);
 
                 const chatContainer = document.getElementById('chat-messages');
                 chatContainer.innerHTML = `
@@ -4230,10 +4541,13 @@
 
                 this.loadMessages();
                 this.listenForMessages();
+
+                // Reset unread count when opening chat
+                this.resetUnreadCount();
             },
 
             loadMessages() {
-                db.ref(`supportChats/${this.chatId}/messages`).once('value').then(snapshot => {
+                db.ref(`${this.chatPath}/messages`).once('value').then(snapshot => {
                     const messages = snapshot.val();
                     if (messages) {
                         Object.values(messages).sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
@@ -4246,10 +4560,10 @@
 
             listenForMessages() {
                 if (this.messagesListener) {
-                    db.ref(`supportChats/${this.chatId}/messages`).off('child_added', this.messagesListener);
+                    db.ref(`${this.chatPath}/messages`).off('child_added', this.messagesListener);
                 }
 
-                this.messagesListener = db.ref(`supportChats/${this.chatId}/messages`).on('child_added', snapshot => {
+                this.messagesListener = db.ref(`${this.chatPath}/messages`).on('child_added', snapshot => {
                     const msg = snapshot.val();
                     if (msg.sender === 'admin') {
                         this.addMessageToUI(msg, true);
@@ -4263,9 +4577,9 @@
                 const message = input.value.trim();
                 if (message === '') return;
 
-                const user = auth.currentUser;
+                const user = currentUser; // Change from auth.currentUser
                 if (!user) {
-                    accountApp.showToast('Please login to send messages');
+                    accountApp.showToast('Please login to send messages', 'warning');
                     return;
                 }
 
@@ -4282,32 +4596,34 @@
                 input.value = '';
                 this.scrollToBottom();
 
-                // Save to Firebase
+                const timestamp = Date.now();
+
+                // Save message to user's chat
                 const messageData = {
                     sender: 'user',
-                    senderName: user.displayName || 'User',
+                    senderName: user.name || 'User',
                     message: message,
-                    timestamp: Date.now()
+                    timestamp: timestamp
                 };
 
-                // Save message to chat
-                db.ref(`supportChats/${this.chatId}/messages`).push(messageData).then(() => {
-                    console.log('✅ Message saved to database');
+                // Save message
+                db.ref(`${this.chatPath}/messages`).push(messageData).then(() => {
+                    console.log('✅ Message saved to user chat');
 
                     // Update chat metadata
-                    db.ref(`supportChats/${this.chatId}`).update({
-                        userId: user.uid,
-                        userName: user.displayName || 'User',
-                        userPhone: user.phoneNumber || 'No phone',
-                        lastMessage: message,
-                        lastMessageTime: Date.now(),
+                    db.ref(this.chatPath).update({
                         status: 'active',
-                        updatedAt: Date.now()
+                        lastMessage: message,
+                        lastMessageTime: timestamp,
+                        updatedAt: timestamp,
+                        userName: user.name || 'User',
+                        userEmail: user.email || 'No email',
+                        userPhone: 'No phone'
                     }).catch(err => console.error('❌ Error updating chat metadata:', err));
 
                 }).catch(err => {
                     console.error('❌ Error saving message:', err);
-                    accountApp.showToast('Failed to send message');
+                    accountApp.showToast('Failed to send message', 'error');
                 });
             },
 
@@ -4329,6 +4645,11 @@
                 `;
 
                 chatMessages.appendChild(messageDiv);
+
+                // Increment unread count if it's a new admin message
+                if (isNew && isAdmin) {
+                    this.incrementUnreadCount();
+                }
             },
 
             scrollToBottom() {
@@ -4338,19 +4659,110 @@
                         chatMessages.parentElement.scrollTop = chatMessages.parentElement.scrollHeight;
                     }, 100);
                 }
+            },
+
+            resetUnreadCount() {
+                if (this.userId) {
+                    db.ref(`${this.chatPath}/unreadCount`).set(0);
+                }
+            },
+
+            incrementUnreadCount() {
+                if (this.userId) {
+                    db.ref(`${this.chatPath}/unreadCount`).transaction((current) => {
+                        return (current || 0) + 1;
+                    });
+                }
             }
+        };
+
+        // --- SPLASH SCREEN MANAGER ---
+        const splashManager = {
+            authReady: false,
+            productsReady: false,
+            maxWaitTime: 6000, // Maximum 6 seconds
+            startTime: Date.now(),
+
+            init() {
+                console.log('🎬 Splash screen manager initialized');
+
+                // Fallback timeout - hide splash after max wait time
+                setTimeout(() => {
+                    if (!this.isHidden) {
+                        console.warn('⏱️ Splash timeout reached, forcing hide');
+                        this.forceHide();
+                    }
+                }, this.maxWaitTime);
+            },
+
+            markAuthReady() {
+                this.authReady = true;
+                console.log('✅ Auth ready');
+                this.checkAndHide();
+            },
+
+            markProductsReady() {
+                this.productsReady = true;
+                console.log('✅ Products ready');
+                this.checkAndHide();
+            },
+
+            checkAndHide() {
+                if (this.authReady && this.productsReady) {
+                    const elapsed = Date.now() - this.startTime;
+                    console.log(`🎉 All ready! Hiding splash after ${elapsed}ms`);
+                    this.hide();
+                } else {
+                    const waiting = [];
+                    if (!this.authReady) waiting.push('auth');
+                    if (!this.productsReady) waiting.push('products');
+                    console.log('⏳ Waiting for:', waiting.join(', '));
+                }
+            },
+
+            hide() {
+                if (this.isHidden) return;
+
+                const splash = document.getElementById('splash-screen');
+                if (splash) {
+                    splash.classList.add('hidden');
+                    // Remove from DOM after transition
+                    setTimeout(() => splash.remove(), 500);
+                    this.isHidden = true;
+                    console.log('👋 Splash screen hidden');
+                }
+            },
+
+            forceHide() {
+                console.warn('⚠️ Force hiding splash (timeout or error)');
+                this.hide();
+            },
+
+            isHidden: false
         };
 
         // --- 3. INIT LOGIC ---
         // Ensure DOM is ready before starting
         document.addEventListener('DOMContentLoaded', () => {
-            themeApp.init(); // Initialize Theme
-            homeApp.init();
-            swipeHandler.init(); // Initialize swipe gestures
-            historyManager.init(); // Initialize back button support
-            // ⚡ Optimization: Load areas only when needed (lazy loading)
-            // if (typeof areaValidation !== 'undefined') areaValidation.init();
+            console.log('📱 DOM Content Loaded - Initializing app...');
 
+            // Initialize splash manager
+            splashManager.init();
+
+            themeApp.init();
+            homeApp.init();
+            swipeHandler.init();
+            historyManager.init();
+
+            console.log('🌍 Initializing service areas...');
+            if (typeof areaValidation !== 'undefined') {
+                areaValidation.init();
+            }
+
+            console.log('📱 Initializing phone validation...');
+            if (typeof phoneValidation !== 'undefined') {
+                phoneValidation.init();
+            }
 
             // Check authentication status on page load
             function checkAuthStatus() {
@@ -4374,21 +4786,16 @@
                     homeApp.renderProducts();
                     accountApp.updateProfileVisibility(false);
                 }
+
+                // Mark auth as ready for splash screen
+                splashManager.markAuthReady();
             }
 
             // Call check on page load
             checkAuthStatus();
         });
 
-        // Splash Screen Logic
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if (splash) {
-                splash.classList.add('hidden');
-                // Remove from DOM after transition
-                setTimeout(() => splash.remove(), 500);
-            }
-        }, 2000);
+        // Old splash screen logic removed - now managed by splashManager
 
     </script>
 </body>
