@@ -4153,7 +4153,8 @@
                 btn.disabled = true;
                 setTimeout(() => {
                     const user = auth.currentUser;
-                    const orderId = Math.floor(100000 + Math.random() * 900000).toString();
+                    // Generate Firebase-compatible order ID with prefix
+                    const orderId = 'O_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
 
                     // Add service type to each bag
                     const services = ['iron', 'wash', 'dry'];
@@ -4174,8 +4175,12 @@
                         userPhone: document.getElementById('display-phone').innerText,
                         userLoc: document.getElementById('display-address').innerText
                     };
+
+                    console.log('📦 Placing order:', orderId, newOrder);
+
                     db.ref('orders/' + orderId).set(newOrder)
                         .then(() => {
+                            console.log('✅ Order placed successfully:', orderId);
                             document.getElementById('orderSuccessView').style.display = 'flex';
                             this.data.bags = [];
                             this.updateCartBadge();
@@ -4183,8 +4188,8 @@
                             btn.disabled = false;
                         })
                         .catch(err => {
-                            console.error(err);
-                            accountApp.showToast("Order Failed. Try again.", 'error');
+                            console.error('❌ Order placement failed:', err);
+                            accountApp.showToast("Order Failed: " + err.message, 'error');
                             btn.disabled = false;
                             btn.innerHTML = 'Place Order';
                         });
