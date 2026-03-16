@@ -16,6 +16,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- Google Identity Services - One Tap / Account Chooser -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 
     <style>
@@ -2710,6 +2712,21 @@
             }
         } catch (e) { console.error(e); }
 
+        // Handle redirect result (fired when user returns from signInWithRedirect)
+auth.getRedirectResult()
+    .then((result) => {
+        if (result && result.user) {
+            console.log('✅ Redirect Sign In Success:', result.user.displayName);
+            // Auth state observer will handle the redirect automatically
+        }
+    })
+    .catch((error) => {
+        if (error.code !== 'auth/no-auth-event') {
+            console.error('Redirect result error:', error);
+            accountApp.showToast("Login Failed: " + error.message, 'error');
+        }
+    });
+
         // --- 2. APP MODULES ---
 
         const accountApp = {
@@ -3157,22 +3174,94 @@
                         globalNav.switchView('home');
                         if (typeof ordersApp !== 'undefined') ordersApp.init();
                     } else {
-                        document.getElementById('view-landing').classList.remove('active');
-                        document.getElementById('view-login').classList.add('active');
-                    }
+    document.getElementById('view-landing').classList.remove('active');
+    document.getElementById('view-login').classList.add('active');
+    // Push step1 into history so back button works
+    history.pushState({ view: 'login', step: 1 }, '', '#login-step1');
+}
                 }).catch((error) => {
                     console.error("Database error:", error);
                     accountApp.showToast("Error connecting to database.", 'error');
                 });
             },
             handleGoogleAuth: () => {
-                auth.signInWithPopup(provider)
-                    .then((result) => { console.log("Google Sign In Success"); })
-                    .catch((error) => {
-                        console.error("Auth Error:", error);
-                        accountApp.showToast("Login Failed: " + error.message, 'error');
-                    });
-            },
+    const btn = document.querySelector('.btn-google');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Connecting...`;
+
+    // Detect if running inside a WebView (APK)
+    const isWebView = /wv|WebView/.test(navigator.userAgent) ||
+                      (navigator.userAgent.includes('Android') && !navigator.userAgent.includes('Chrome/'));
+
+    if (isWebView) {
+        // ✅ WebView / APK path → use Google One Tap (native account picker sheet)
+        landingApp._initOneTap();
+    } else {
+        // ✅ Browser path → use Firebase popup (normal Chrome/Safari)
+        auth.signInWithPopup(provider)
+            .then(() => { console.log("✅ Popup Sign In Success"); })
+            .catch((error) => {
+                console.error("Auth Error:", error);
+                // If popup was blocked, fall back to redirect
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user') {
+                    auth.signInWithRedirect(provider);
+                } else {
+                    accountApp.showToast("Login Failed: " + error.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = `<svg class="g-svg" ...></svg> Continue with Google`;
+                }
+            });
+    }
+},
+
+_initOneTap: () => {
+    // Wait for GIS script to load
+    const tryOneTap = () => {
+        if (typeof google === 'undefined' || !google.accounts) {
+            setTimeout(tryOneTap, 300); // Retry until GIS loaded
+            return;
+        }
+
+        google.accounts.id.initialize({
+            client_id: '52172689456-YOUR_CLIENT_ID.apps.googleusercontent.com', // ← your Web Client ID
+            callback: landingApp._handleOneTapCredential,
+            auto_select: true,        // Auto-selects if only 1 account on phone
+            cancel_on_tap_outside: false,
+            use_fedcm_for_prompt: true // Modern Android account chooser
+        });
+
+        // Show the native account chooser bottom sheet
+        google.accounts.id.prompt((notification) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                // One Tap was suppressed → fall back to redirect flow
+                console.warn('⚠️ One Tap suppressed, falling back to redirect');
+                auth.signInWithRedirect(provider);
+            }
+        });
+    };
+
+    tryOneTap();
+},
+
+_handleOneTapCredential: (response) => {
+    // Exchange the Google ID token for a Firebase credential
+    const idToken = response.credential;
+    const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+
+    auth.signInWithCredential(credential)
+        .then((result) => {
+            console.log('✅ One Tap Sign In Success:', result.user.displayName);
+        })
+        .catch((error) => {
+            console.error('❌ Credential error:', error);
+            accountApp.showToast("Login Failed: " + error.message, 'error');
+            const btn = document.querySelector('.btn-google');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="g-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">...</svg> Continue with Google`;
+            }
+        });
+},
             confirmLogout: () => { document.getElementById('logoutModal').style.display = 'flex'; },
             performLogout: () => {
                 auth.signOut().then(() => {
@@ -3356,7 +3445,12 @@
                         <div class="oc-row-top">
                             <div>
                                 <span class="oc-date">${new Date(order.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                                <span class="oc-id">#${order.id}</span>
+                                <span class="oc-id" 
+    onclick="navigator.clipboard.writeText('${order.id}').then(() => accountApp.showToast('Order ID copied! 📋', 'success'))"
+    title="Tap to copy"
+    style="cursor:pointer; user-select:none;">
+    #${order.id} <i class="fas fa-copy" style="font-size:10px; opacity:0.5; margin-left:3px;"></i>
+</span>
                             </div>
                             <span class="oc-price">${order.total}</span>
                         </div>
@@ -3652,22 +3746,22 @@
 
         const loginApp = {
             nextStep: () => {
-                const name = document.getElementById('fullName').value;
-                const phone = document.getElementById('whatsapp').value;
-                if (name === "" || phone === "") { accountApp.showToast("Please fill in all fields.", 'warning'); return; }
-                document.getElementById('step1').classList.remove('active');
-                document.getElementById('step2').classList.add('active');
-                document.getElementById('step2Indicator').classList.add('active');
-                document.getElementById('progressFill').style.width = "100%";
-                // ⚡ Lazy load areas when entering step 2
-                if (typeof areaValidation !== 'undefined') {
-                    // Initialize areas if not already loaded
-                    if (!areaValidation.availableAreas || areaValidation.availableAreas.length === 0) {
-                        areaValidation.init();
-                    }
-                    areaValidation.attach('areaSearch', 'areaSuggestions', 'areaError');
-                }
-            },
+    const name = document.getElementById('fullName').value;
+    const phone = document.getElementById('whatsapp').value;
+    if (name === "" || phone === "") { accountApp.showToast("Please fill in all fields.", 'warning'); return; }
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    document.getElementById('step2Indicator').classList.add('active');
+    document.getElementById('progressFill').style.width = "100%";
+    // Push step2 into history so back button goes to step1
+    history.pushState({ view: 'login', step: 2 }, '', '#login-step2');
+    if (typeof areaValidation !== 'undefined') {
+        if (!areaValidation.availableAreas || areaValidation.availableAreas.length === 0) {
+            areaValidation.init();
+        }
+        areaValidation.attach('areaSearch', 'areaSuggestions', 'areaError');
+    }
+},
             prevStep: () => {
                 document.getElementById('step2').classList.remove('active');
                 document.getElementById('step1').classList.add('active');
@@ -4092,12 +4186,10 @@
                 this.updateBill();
             },
             toggleService(index, type) {
-                const bag = this.data.bags[index];
-                const idx = bag.services.indexOf(type);
-                if (idx > -1) bag.services.splice(idx, 1); else bag.services.push(type);
-                if (bag.services.length === 0) bag.services.push('wash');
-                this.renderCart();
-            },
+    const bag = this.data.bags[index];
+    bag.services = [type]; // ← Replace entire array with only the selected service
+    this.renderCart();
+},
             deleteBag(index) {
                 this.data.bags.splice(index, 1);
                 this.renumberBags();
@@ -4154,7 +4246,13 @@
                 setTimeout(() => {
                     const user = auth.currentUser;
                     // Generate Firebase-compatible order ID with prefix
-                    const orderId = 'O_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                   const orderId = (() => {
+    const ts        = Date.now().toString(36).toUpperCase();          // Layer 1: Base-36 timestamp   e.g. "LX3KQ8M"
+    const uid       = (user.uid || '').slice(-6).toUpperCase();       // Layer 2: Last 6 chars of UID  e.g. "A3F9B1"
+    const entropy   = crypto.getRandomValues(new Uint32Array(1))[0]
+                        .toString(36).slice(0, 5).toUpperCase();      // Layer 3: Crypto-random 5 chars e.g. "7KZ2P"
+    return `LE-${ts}-${uid}-${entropy}`;                              // Final:   LE-LX3KQ8M-A3F9B1-7KZ2P
+})();
 
                     // Add service type to each bag
                     const services = ['iron', 'wash', 'dry'];
@@ -4202,76 +4300,71 @@
         };
 
         // --- SWIPE GESTURE HANDLER ---
-        const swipeHandler = {
-            touchStartX: 0,
-            touchStartY: 0,
-            touchEndX: 0,
-            touchEndY: 0,
-            minSwipeDistance: 15, // Reduced to 15px for sensitive swipe (thora sa swipe)
+const swipeHandler = {
+    touchStartX: 0,
+    touchStartY: 0,
+    touchEndX: 0,
+    touchEndY: 0,
+    minSwipeDistance: 15,
 
-            init() {
-                const productList = document.getElementById('product-list');
-                if (!productList) return;
+    init() {
+        const swipeZone = document.getElementById('screen-products');
+        if (!swipeZone) return;
 
-                productList.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
-                productList.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: true });
-                productList.addEventListener('touchend', (e) => this.handleTouchEnd(e));
-            },
+        swipeZone.addEventListener('touchstart', (e) => this.onStart(e), { passive: true });
+        swipeZone.addEventListener('touchmove',  (e) => this.onMove(e),  { passive: true });
+        swipeZone.addEventListener('touchend',   (e) => this.onEnd(e));
+    },
 
-            handleTouchStart(e) {
-                this.touchStartX = e.changedTouches[0].screenX;
-                this.touchStartY = e.changedTouches[0].screenY;
-            },
+    onStart(e) {
+        this.touchStartX = e.changedTouches[0].screenX;
+        this.touchStartY = e.changedTouches[0].screenY;
+        this.touchEndX   = this.touchStartX;
+        this.touchEndY   = this.touchStartY;
+    },
 
-            handleTouchMove(e) {
-                this.touchEndX = e.changedTouches[0].screenX;
-                this.touchEndY = e.changedTouches[0].screenY;
-            },
+    onMove(e) {
+        this.touchEndX = e.changedTouches[0].screenX;
+        this.touchEndY = e.changedTouches[0].screenY;
+    },
 
-            handleTouchEnd(e) {
-                const deltaX = this.touchEndX - this.touchStartX;
-                const deltaY = this.touchEndY - this.touchStartY;
+    onEnd(e) {
+        const deltaX = this.touchEndX - this.touchStartX;
+        const deltaY = this.touchEndY - this.touchStartY;
 
-                // Check if it's more horizontal than vertical (to avoid interfering with scroll)
-                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > this.minSwipeDistance) {
-                    if (deltaX > 0) {
-                        // Swipe right
-                        this.handleSwipeRight();
-                    } else {
-                        // Swipe left
-                        this.handleSwipeLeft();
-                    }
-                }
+        const target = e.target;
+        const isInteractive = target.closest('.btn-count') ||
+                              target.closest('.counter') ||
+                              target.closest('.tab') ||
+                              target.closest('.floating-bar');
 
-                // Reset
-                this.touchStartX = 0;
-                this.touchStartY = 0;
-                this.touchEndX = 0;
-                this.touchEndY = 0;
-            },
+        if (!isInteractive &&
+            Math.abs(deltaX) > Math.abs(deltaY) &&
+            Math.abs(deltaX) > this.minSwipeDistance) {
 
-            handleSwipeLeft() {
-                // Swipe left -> Go to Women
-                if (homeApp.data.activeTab === 'Men') {
-                    homeApp.switchTab('Women', 'left');
-                }
-            },
+            const currentTab = homeApp.data.activeTab;
 
-            handleSwipeRight() {
-                // Swipe right -> Go to Men
-                if (homeApp.data.activeTab === 'Women') {
-                    homeApp.switchTab('Men', 'right');
-                }
+            if (deltaX < 0 && currentTab === 'Men') {
+                homeApp.switchTab('Women', 'left');
+            } else if (deltaX > 0 && currentTab === 'Women') {
+                homeApp.switchTab('Men', 'right');
             }
-        };
+        }
+
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX   = 0;
+        this.touchEndY   = 0;
+    }
+};
 
         // --- HISTORY MANAGER ---
         const historyManager = {
             init() {
                 // Set initial state if none exists
                 if (!history.state) {
-                    history.replaceState({ view: 'home', subView: 'home' }, '', '#home');
-                }
+    history.replaceState({ view: 'landing' }, '', '#landing');
+}
 
                 window.addEventListener('popstate', (event) => {
                     const state = event.state;
@@ -4285,16 +4378,39 @@
             },
 
             restoreState(state) {
-                console.log("Restoring state:", state);
-                if (state.view === 'home') {
-                    globalNav.switchView('home', false);
-                    if (state.subView) {
-                        homeApp.navTo(state.subView, false);
-                    }
-                } else {
-                    globalNav.switchView(state.view, false);
-                }
-            }
+    console.log("Restoring state:", state);
+
+    if (state.view === 'login') {
+        // Back button inside the registration flow
+        if (state.step === 2) {
+            // On step2 → go back to step1 (Name/Phone)
+            loginApp.prevStep();
+        } else {
+            // On step1 → go all the way back to Landing
+            document.getElementById('view-login').classList.remove('active');
+            document.getElementById('view-landing').classList.add('active');
+        }
+
+    } else if (state.view === 'landing') {
+        // Logged-in user pressed back → show landing but skip login steps
+        const user = auth.currentUser;
+        if (user) {
+            // Already logged in: back goes to landing (Google sign-in page)
+            globalNav.switchView('landing', false);
+        } else {
+            globalNav.switchView('landing', false);
+        }
+
+    } else if (state.view === 'home') {
+        globalNav.switchView('home', false);
+        if (state.subView) {
+            homeApp.navTo(state.subView, false);
+        }
+
+    } else {
+        globalNav.switchView(state.view, false);
+    }
+}
         };
 
 
